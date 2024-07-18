@@ -8,7 +8,6 @@ namespace VlcPlayerWinforms
         // attributes
         Point precedentMousePosition = new Point(0, 0);
         bool isFullScreen = false;
-        bool isPlaying = false;
         int totalSeconds = 0;
 
         public MainForm()
@@ -20,7 +19,7 @@ namespace VlcPlayerWinforms
         private void MainForm_Load(object sender, EventArgs e)
         {
             loadMedia(new Uri("https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4"));
-            
+
             // init Queue Panel
             QueuePanel.AutoScroll = true;
             for (int i = 0; i < 30; i++)
@@ -44,14 +43,12 @@ namespace VlcPlayerWinforms
             {
                 if (isFullScreen)
                 {
-                    TopMost = false;
                     FormBorderStyle = FormBorderStyle.Sizable;
                     WindowState = FormWindowState.Normal;
                     isFullScreen = false;
                 }
                 else
                 {
-                    TopMost = true;
                     FormBorderStyle = FormBorderStyle.None;
                     WindowState = FormWindowState.Maximized;
                     isFullScreen = true;
@@ -61,14 +58,12 @@ namespace VlcPlayerWinforms
             {
                 if (!(bool)explicitModify)
                 {
-                    TopMost = false;
                     FormBorderStyle = FormBorderStyle.Sizable;
                     WindowState = FormWindowState.Normal;
                     isFullScreen = false;
                 }
                 else
                 {
-                    TopMost = true;
                     FormBorderStyle = FormBorderStyle.None;
                     WindowState = FormWindowState.Maximized;
                     isFullScreen = true;
@@ -82,42 +77,18 @@ namespace VlcPlayerWinforms
             MessageBox.Show("Hey");
         }
 
-        private void MainForm_Resize(object sender, EventArgs e)
-        {
-            if (WindowState == FormWindowState.Minimized)
-            {
-                //video pause
-            }
-            else if (WindowState == FormWindowState.Maximized)
-            {
-                if (!isFullScreen)
-                {
-                    ModifyFullScreen(true);
-                }
-            }
-            else
-            {
-
-            }
-        }
-
         private void timer1_Tick(object sender, EventArgs e)
         {
             Point curPos = MousePosition;
             if (curPos.Equals(precedentMousePosition))
             {
-                //playPictureBox.Hide();
-                //stopPictureBox.Hide();
                 panelMediaControl.Hide();
             }
             else
             {
-                //playPictureBox.Show();
-                //stopPictureBox.Show();
                 panelMediaControl.Show();
             }
             precedentMousePosition = curPos;
-            //labelTimerTest.Text = precedentMousePosition.ToString();
         }
 
         private void vlcControl1_MouseEnter(object sender, EventArgs e)
@@ -128,8 +99,6 @@ namespace VlcPlayerWinforms
         private void vlcControl1_MouseLeave(object sender, EventArgs e)
         {
             timerMouseMovement.Enabled = false;
-            //playPictureBox.Show();
-            //stopPictureBox.Show();
             panelMediaControl.Show();
         }
 
@@ -140,31 +109,41 @@ namespace VlcPlayerWinforms
 
         private void MainForm_KeyDown(object sender, KeyEventArgs e)
         {
-            if (e.KeyCode == Keys.Escape)
+            switch (e.KeyCode)
             {
-                ModifyFullScreen(false);
+                case Keys.Escape:
+                    ModifyFullScreen(false);
+                    break;
+
+                case Keys.Space:
+                    playPictureBox_Click(sender, e);
+                    break;
+
+                case Keys.F11:
+                    ModifyFullScreen(null);
+                    break;
+
+                case Keys.Left:
+                    vlcControl.Time += 10;
+                    break;
+
+                case Keys.Right:
+                    vlcControl.Time -= 10;
+                    break;
+
             }
-            else if (e.KeyCode == Keys.Space)
-            {
-                playPictureBox_Click(sender, e);
-            }
-            else if (e.KeyCode == Keys.F11)
-            {
-                ModifyFullScreen(null);
-            }
+
         }
 
         private void playPictureBox_Click(object sender, EventArgs e)
         {
-            if (isPlaying)
+            if (vlcControl.IsPlaying)
             {
-                isPlaying = false;
                 vlcControl.Pause();
                 playPictureBox.BackgroundImage = Properties.Resources.play_50px;
             }
             else
             {
-                isPlaying = true;
                 vlcControl.Pause();
                 playPictureBox.BackgroundImage = Properties.Resources.pause_50px;
             }
@@ -173,41 +152,42 @@ namespace VlcPlayerWinforms
         private async void loadMedia(Uri uri)
         {
             vlcControl.Play(uri);
-            isPlaying = true;
 
             //time to load media
             await Task.Delay(1);
 
             TimeSpan totalT = vlcControl.GetCurrentMedia().Duration;
-            labelTotalMediaTime.Text = timeSpan2String(totalT);
+            labelTotalMediaTime.Text = TimeSpan2String(totalT);
 
             // init progress bar
             totalSeconds = (int)totalT.TotalSeconds;
-            mediaProgressBar.Maximum = totalSeconds*10; // updateMediaTime = 100 ms, but we want 1 second
-            mediaProgressBar.Minimum = 0;
-            mediaProgressBar.Value = 0;
-            mediaProgressBar.Step = 1;
+            mediaCustomProgressBar.Maximum = totalSeconds;
+            mediaCustomProgressBar.Minimum = 0;
+            mediaCustomProgressBar.Value = 0;
+            mediaCustomProgressBar.Step = 1;
+
 
         }
 
         private void updateMediaTime_Tick(object sender, EventArgs e)
         {
-            if (isPlaying)
+            if (vlcControl.IsPlaying)
             {
                 /// BUG ON DISPLAY CURT, LATE ON REALTIME
                 // Update media time display
-                TimeSpan curT = new TimeSpan((int)(Math.Round(vlcControl.Position, 2) * 100) * 10000000); 
-                labelCurrentMediaTime.Text = timeSpan2String(curT);
+                TimeSpan curT = new TimeSpan((int)(Math.Round(vlcControl.Position, 2) * 100) * 10000000);
+
+                labelCurrentMediaTime.Text = TimeSpan2String(curT);
 
                 // Update progress bar
-                mediaProgressBar.PerformStep();
+                mediaCustomProgressBar.Value = (int)(Math.Round(vlcControl.Position, 2) * 100);
 
             }
         }
 
-        private String timeSpan2String(TimeSpan timeSpan)
+        private String TimeSpan2String(TimeSpan timeSpan)
         {
-            return String.Format("{0:00}:{1:00}:{2:00}", timeSpan.Hours,timeSpan.Minutes, timeSpan.Seconds);
+            return $"{timeSpan.Hours:00}:{timeSpan.Minutes:00}:{timeSpan.Seconds:00}";
         }
 
         private void ouvrirUnFichierToolStripMenuItem_Click(object sender, EventArgs e)
@@ -260,7 +240,7 @@ namespace VlcPlayerWinforms
             {
                 QueuePanel.Show();
             }
-            
+
         }
     }
 }

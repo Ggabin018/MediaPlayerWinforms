@@ -9,6 +9,7 @@ using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.ComponentModel;
 using System.DirectoryServices.ActiveDirectory;
+using AxWMPLib;
 
 namespace VlcPlayerWinforms.CustomControls
 {
@@ -33,11 +34,15 @@ namespace VlcPlayerWinforms.CustomControls
         private string symbolAfter = "";
         private bool showMaximun = false;
         private bool showCur = false;
-        private Rectangle prevRectText = Rectangle.Empty;
+        private AxWMPLib.AxWindowsMediaPlayer mediaPlayer;
+
 
         //Others
         private bool paintedBack = false;
         private bool stopPainting = false;
+        private Rectangle prevRectText = Rectangle.Empty;
+        private Rectangle prevRectBar = Rectangle.Empty;
+
 
         public CustomProgressBar()
         {
@@ -138,13 +143,24 @@ namespace VlcPlayerWinforms.CustomControls
         [Category("Custom Controls")]
         public bool ShowCur
         {
-            get => showCur; set
+            get => showCur; 
+            set
             {
                 showCur = value;
                 Invalidate();
             }
         }
 
+        [Category("Custom Controls")]
+        public AxWindowsMediaPlayer MediaPlayer 
+        { 
+            get => mediaPlayer; 
+            set
+            { 
+                mediaPlayer = value;
+                Invalidate();
+            }
+        }
 
 
         [Browsable(true)]
@@ -153,14 +169,15 @@ namespace VlcPlayerWinforms.CustomControls
 
         [Category("Custom Controls")]
         public override Color ForeColor { get => base.ForeColor; set => base.ForeColor = value; }
+        
 
 
         //-> Paint the background & channel
         protected override void OnPaintBackground(PaintEventArgs pevent)
         {
-            if (stopPainting == false)
+            if (!stopPainting)
             {
-                if (paintedBack == false)
+                if (!paintedBack)
                 {
                     //Fields
                     Graphics graph = pevent.Graphics;
@@ -191,7 +208,7 @@ namespace VlcPlayerWinforms.CustomControls
             // mouse hover
             Point clientPos = PointToClient(MousePosition);
 
-            if (stopPainting == false)
+            if (!stopPainting)
             {
                 //Fields
                 Graphics graph = e.Graphics;
@@ -206,14 +223,39 @@ namespace VlcPlayerWinforms.CustomControls
 
                     //Painting
                     if (sliderWidth > 1) //Slider
+                    {
+                        // Clear previous text
+                        if (prevRectBar != Rectangle.Empty)
+                        {
+                            using (var brushClear = new SolidBrush(channelColor))
+                            {
+                                graph.FillRectangle(brushClear, prevRectBar);
+                            }
+                        }
+                        // Paint
                         graph.FillRectangle(brushSlider, rectSlider);
+                        // Update previous text rectangle
+                        prevRectBar = rectSlider;
+                    }
+                        
                     if (showValue != TextPosition.None) //Text
                         DrawValueText(graph, sliderWidth, rectSlider);
 
+                    // painting time near mouse
                     if (showCur &&
-                        clientPos.Y > Location.Y - sliderHeight &&
-                        clientPos.Y < Location.Y + sliderHeight)
+                        clientPos.Y > Location.Y &&
+                        clientPos.Y < Location.Y + 30)
                         DrawValueTime(graph);
+                    else
+                    {
+                        if (prevRectText != Rectangle.Empty)
+                        {
+                            using (var brushClear = new SolidBrush(Parent.BackColor))
+                            {
+                                graph.FillRectangle(brushClear, prevRectText);
+                            }
+                        }
+                    }
                 }
             }
             if (Value == Maximum) stopPainting = true;//Stop painting
@@ -261,10 +303,13 @@ namespace VlcPlayerWinforms.CustomControls
                             graph.FillRectangle(brushClear, rect);
                         }
                         break;
+
                 }
+
                 //Painting
                 graph.FillRectangle(brushTextBack, rectText);
                 graph.DrawString(text, Font, brushText, rectText, textFormat);
+
             }
         }
 
@@ -274,11 +319,11 @@ namespace VlcPlayerWinforms.CustomControls
             
             //Fields
             Point clientPos = PointToClient(MousePosition);
-            var result = SecondsToHMS(clientPos.X * Maximum / Width);
-            string text = $"{result.hours:00}:{result.minutes:00}:{result.seconds}";
+            string text = $"{TimeSpan.FromSeconds(clientPos.X * Maximum / Width):hh\\:mm\\:ss}";
 
             var textSize = TextRenderer.MeasureText(text, Font);
-            var rectText = new Rectangle(0, 0, textSize.Width, textSize.Height + 2);
+            // textSize.Width+1 because it's too close so the last digit is not display
+            var rectText = new Rectangle(0, 0, textSize.Width+1, textSize.Height + 2);
             
 
             using (var brushText = new SolidBrush(ForeColor))
@@ -305,13 +350,23 @@ namespace VlcPlayerWinforms.CustomControls
             }
         }
 
-        private (int hours, int minutes, int seconds) SecondsToHMS(int totalSeconds)
+        protected override void OnMouseClick(MouseEventArgs e)
         {
-            int hours = totalSeconds / 3600;
-            int minutes = (totalSeconds % 3600) / 60;
-            int seconds = totalSeconds % 60;
+            base.OnMouseClick(e);
 
-            return (hours, minutes, seconds);
+            Point clientPos = PointToClient(MousePosition);
+
+            if (showCur &&
+                        clientPos.Y > Location.Y &&
+                        clientPos.Y < Location.Y + 30)
+            {
+                int newTime = clientPos.X * Maximum / Width;
+                Value = newTime;
+                mediaPlayer.Ctlcontrols.currentPosition = newTime;
+            }
+                
+            
         }
+
     }
 }

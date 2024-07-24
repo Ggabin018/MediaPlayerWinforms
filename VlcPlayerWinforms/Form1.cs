@@ -19,10 +19,12 @@ namespace VlcPlayerWinforms
             InitializeComponent();
 
             windowsMediaPlayer.uiMode = "none";
+            mediaCustomProgressBar.MediaPlayer = windowsMediaPlayer;
         }
 
         private void MainForm_Load(object sender, EventArgs e)
         {
+            // init media player + progress bar
             loadMedia("https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4");
 
             // init Queue Panel
@@ -128,12 +130,25 @@ namespace VlcPlayerWinforms
                     ModifyFullScreen(null);
                     break;
 
-                case Keys.Left:
-                    //vlcControl.Time += 10;
+                case Keys.Right:
+                    if (windowsMediaPlayer.Ctlcontrols.currentPosition + 10 < windowsMediaPlayer.currentMedia.duration)
+                    {
+                        windowsMediaPlayer.Ctlcontrols.currentPosition += 10;
+                        mediaCustomProgressBar.Value += 10;
+                    }
                     break;
 
-                case Keys.Right:
-                    //vlcControl.Time -= 10;
+                case Keys.Left:
+                    if (windowsMediaPlayer.Ctlcontrols.currentPosition - 10 >= 0)
+                    {
+                        windowsMediaPlayer.Ctlcontrols.currentPosition -= 10;
+                        mediaCustomProgressBar.Value -= 10;
+                    }
+                    else
+                    {
+                        windowsMediaPlayer.Ctlcontrols.currentPosition = 0;
+                        mediaCustomProgressBar.Value = 0;
+                    }
                     break;
 
             }
@@ -159,13 +174,13 @@ namespace VlcPlayerWinforms
             windowsMediaPlayer.URL = url;
 
             //time to load media
-            await Task.Delay(1);
+            await Task.Delay(1000);
 
-            //TimeSpan totalT = vlcControl.GetCurrentMedia().Duration;
-            //labelTotalMediaTime.Text = TimeSpan2String(totalT);
+            double duration = windowsMediaPlayer.currentMedia.duration;
+            labelTotalMediaTime.Text = $"{TimeSpan.FromSeconds(duration):hh\\:mm\\:ss}";
 
             // init progress bar
-            //totalSeconds = (int)totalT.TotalSeconds;
+            totalSeconds = (int)duration;
             mediaCustomProgressBar.Maximum = totalSeconds;
             mediaCustomProgressBar.Minimum = 0;
             mediaCustomProgressBar.Value = 0;
@@ -180,19 +195,13 @@ namespace VlcPlayerWinforms
             {
                 /// BUG ON DISPLAY CURT, LATE ON REALTIME
                 // Update media time display
-                //TimeSpan curT = new TimeSpan((int)(Math.Round(vlcControl.Position, 2) * 100) * 10000000);
-
-                //labelCurrentMediaTime.Text = TimeSpan2String(curT);
+                double currentPosition = windowsMediaPlayer.Ctlcontrols.currentPosition;
+                labelCurrentMediaTime.Text = $"{TimeSpan.FromSeconds(currentPosition):hh\\:mm\\:ss}";
 
                 // Update progress bar
-                //mediaCustomProgressBar.Value = (int)(Math.Round(vlcControl.Position, 2) * 100);
+                mediaCustomProgressBar.Value = (int)currentPosition;
 
             }
-        }
-
-        private String TimeSpan2String(TimeSpan timeSpan)
-        {
-            return $"{timeSpan.Hours:00}:{timeSpan.Minutes:00}:{timeSpan.Seconds:00}";
         }
 
         private void ouvrirUnFichierToolStripMenuItem_Click(object sender, EventArgs e)
@@ -227,7 +236,7 @@ namespace VlcPlayerWinforms
 
         private void stopPictureBox_Click(object sender, EventArgs e)
         {
-            //vlcControl.Stop();
+            windowsMediaPlayer.Ctlcontrols.stop();
         }
 
         private void queuePictureBox_Click(object sender, EventArgs e)
@@ -249,5 +258,6 @@ namespace VlcPlayerWinforms
         {
             playPictureBox_Click(sender, null);
         }
+
     }
 }

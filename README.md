@@ -1,1 +1,1 @@
-# VlcPlayerWinforms
+# MediaPlayerWinforms

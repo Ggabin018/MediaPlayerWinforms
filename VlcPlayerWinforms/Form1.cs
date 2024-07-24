@@ -1,4 +1,7 @@
+using AxWMPLib;
 using Microsoft.VisualBasic.ApplicationServices;
+using VlcPlayerWinforms.CustomControls;
+using WMPLib;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace VlcPlayerWinforms
@@ -10,15 +13,17 @@ namespace VlcPlayerWinforms
         bool isFullScreen = false;
         int totalSeconds = 0;
 
+
         public MainForm()
         {
-            //vlcControl.VlcLibDirectory = new DirectoryInfo("C:\\Program Files\\VideoLAN\\VLC");
             InitializeComponent();
+
+            windowsMediaPlayer.uiMode = "none";
         }
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            loadMedia(new Uri("https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4"));
+            loadMedia("https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4");
 
             // init Queue Panel
             QueuePanel.AutoScroll = true;
@@ -124,43 +129,43 @@ namespace VlcPlayerWinforms
                     break;
 
                 case Keys.Left:
-                    vlcControl.Time += 10;
+                    //vlcControl.Time += 10;
                     break;
 
                 case Keys.Right:
-                    vlcControl.Time -= 10;
+                    //vlcControl.Time -= 10;
                     break;
 
             }
 
         }
 
-        private void playPictureBox_Click(object sender, EventArgs e)
+        private void playPictureBox_Click(object sender, EventArgs? e)
         {
-            if (vlcControl.IsPlaying)
+            if (windowsMediaPlayer.playState == WMPLib.WMPPlayState.wmppsPlaying)
             {
-                vlcControl.Pause();
+                windowsMediaPlayer.Ctlcontrols.pause();
                 playPictureBox.BackgroundImage = Properties.Resources.play_50px;
             }
             else
             {
-                vlcControl.Pause();
+                windowsMediaPlayer.Ctlcontrols.play();
                 playPictureBox.BackgroundImage = Properties.Resources.pause_50px;
             }
         }
 
-        private async void loadMedia(Uri uri)
+        private async void loadMedia(string url)
         {
-            vlcControl.Play(uri);
+            windowsMediaPlayer.URL = url;
 
             //time to load media
             await Task.Delay(1);
 
-            TimeSpan totalT = vlcControl.GetCurrentMedia().Duration;
-            labelTotalMediaTime.Text = TimeSpan2String(totalT);
+            //TimeSpan totalT = vlcControl.GetCurrentMedia().Duration;
+            //labelTotalMediaTime.Text = TimeSpan2String(totalT);
 
             // init progress bar
-            totalSeconds = (int)totalT.TotalSeconds;
+            //totalSeconds = (int)totalT.TotalSeconds;
             mediaCustomProgressBar.Maximum = totalSeconds;
             mediaCustomProgressBar.Minimum = 0;
             mediaCustomProgressBar.Value = 0;
@@ -171,16 +176,16 @@ namespace VlcPlayerWinforms
 
         private void updateMediaTime_Tick(object sender, EventArgs e)
         {
-            if (vlcControl.IsPlaying)
+            if (windowsMediaPlayer.playState == WMPPlayState.wmppsPlaying)
             {
                 /// BUG ON DISPLAY CURT, LATE ON REALTIME
                 // Update media time display
-                TimeSpan curT = new TimeSpan((int)(Math.Round(vlcControl.Position, 2) * 100) * 10000000);
+                //TimeSpan curT = new TimeSpan((int)(Math.Round(vlcControl.Position, 2) * 100) * 10000000);
 
-                labelCurrentMediaTime.Text = TimeSpan2String(curT);
+                //labelCurrentMediaTime.Text = TimeSpan2String(curT);
 
                 // Update progress bar
-                mediaCustomProgressBar.Value = (int)(Math.Round(vlcControl.Position, 2) * 100);
+                //mediaCustomProgressBar.Value = (int)(Math.Round(vlcControl.Position, 2) * 100);
 
             }
         }
@@ -222,12 +227,7 @@ namespace VlcPlayerWinforms
 
         private void stopPictureBox_Click(object sender, EventArgs e)
         {
-            vlcControl.Stop();
-        }
-
-        private void vlcControl_Click(object sender, EventArgs e)
-        {
-            playPictureBox_Click(sender, e);
+            //vlcControl.Stop();
         }
 
         private void queuePictureBox_Click(object sender, EventArgs e)
@@ -241,6 +241,13 @@ namespace VlcPlayerWinforms
                 QueuePanel.Show();
             }
 
+        }
+
+
+
+        private void windowsMediaPlayer_MouseUpEvent(object sender, _WMPOCXEvents_MouseUpEvent e)
+        {
+            playPictureBox_Click(sender, null);
         }
     }
 }

@@ -33,6 +33,7 @@ namespace VlcPlayerWinforms.CustomControls
         private string symbolAfter = "";
         private bool showMaximun = false;
         private bool showCur = false;
+        private Rectangle prevRectText = Rectangle.Empty;
 
         //Others
         private bool paintedBack = false;
@@ -270,6 +271,7 @@ namespace VlcPlayerWinforms.CustomControls
         // Paint time over the progress bar at the mouse location
         private void DrawValueTime(Graphics graph)
         {
+            
             //Fields
             Point clientPos = PointToClient(MousePosition);
             var result = SecondsToHMS(clientPos.X * Maximum / Width);
@@ -285,9 +287,21 @@ namespace VlcPlayerWinforms.CustomControls
             {
                 rectText.X = clientPos.X;
 
-                //Painting
+                // Clear previous text
+                if (prevRectText != Rectangle.Empty)
+                {
+                    using (var brushClear = new SolidBrush(Parent.BackColor))
+                    {
+                        graph.FillRectangle(brushClear, prevRectText);
+                    }
+                }
+
+                // Painting
                 graph.FillRectangle(brushTextBack, rectText);
                 graph.DrawString(text, Font, brushText, rectText, textFormat);
+
+                // Update previous text rectangle
+                prevRectText = rectText;
             }
         }
 

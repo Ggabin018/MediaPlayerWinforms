@@ -31,9 +31,9 @@ namespace VlcPlayerWinforms
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
             QueuePanel = new FlowLayoutPanel();
             ImageListQueue = new ImageList(components);
-            vlcControl = new VlcControl();
             timerMouseMovement = new System.Windows.Forms.Timer(components);
             playPictureBox = new PictureBox();
             menuStrip1 = new MenuStrip();
@@ -60,13 +60,14 @@ namespace VlcPlayerWinforms
             labelCurrentMediaTime = new Label();
             mediaCustomProgressBar = new CustomControls.CustomProgressBar();
             updateMediaTime = new System.Windows.Forms.Timer(components);
-            ((System.ComponentModel.ISupportInitialize)vlcControl).BeginInit();
+            windowsMediaPlayer = new AxWMPLib.AxWindowsMediaPlayer();
             ((System.ComponentModel.ISupportInitialize)playPictureBox).BeginInit();
             menuStrip1.SuspendLayout();
             panelMediaControl.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)queuePictureBox).BeginInit();
             ((System.ComponentModel.ISupportInitialize)stopPictureBox).BeginInit();
             timeWithProgressBar.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)windowsMediaPlayer).BeginInit();
             SuspendLayout();
             // 
             // QueuePanel
@@ -76,7 +77,7 @@ namespace VlcPlayerWinforms
             QueuePanel.Dock = DockStyle.Right;
             QueuePanel.Location = new Point(709, 24);
             QueuePanel.Name = "QueuePanel";
-            QueuePanel.Size = new Size(164, 432);
+            QueuePanel.Size = new Size(164, 405);
             QueuePanel.TabIndex = 5;
             // 
             // ImageListQueue
@@ -84,22 +85,6 @@ namespace VlcPlayerWinforms
             ImageListQueue.ColorDepth = ColorDepth.Depth32Bit;
             ImageListQueue.ImageSize = new Size(16, 16);
             ImageListQueue.TransparentColor = Color.Transparent;
-            // 
-            // vlcControl
-            // 
-            vlcControl.BackColor = Color.Black;
-            vlcControl.Dock = DockStyle.Fill;
-            vlcControl.Location = new Point(0, 24);
-            vlcControl.Name = "vlcControl";
-            vlcControl.Size = new Size(709, 432);
-            vlcControl.Spu = -1;
-            vlcControl.TabIndex = 0;
-            vlcControl.Text = "vlcControl";
-            vlcControl.VlcMediaplayerOptions = null;
-            vlcControl.Click += vlcControl_Click;
-            vlcControl.DoubleClick += vlcControl1_DoubleClick;
-            vlcControl.MouseEnter += vlcControl1_MouseEnter;
-            vlcControl.MouseLeave += vlcControl1_MouseLeave;
             // 
             // timerMouseMovement
             // 
@@ -111,7 +96,7 @@ namespace VlcPlayerWinforms
             playPictureBox.BackColor = Color.DimGray;
             playPictureBox.BackgroundImage = Properties.Resources.pause_50px;
             playPictureBox.BackgroundImageLayout = ImageLayout.Stretch;
-            playPictureBox.Location = new Point(3, 43);
+            playPictureBox.Location = new Point(3, 64);
             playPictureBox.Name = "playPictureBox";
             playPictureBox.Size = new Size(25, 25);
             playPictureBox.TabIndex = 9;
@@ -230,16 +215,16 @@ namespace VlcPlayerWinforms
             panelMediaControl.Controls.Add(playPictureBox);
             panelMediaControl.Controls.Add(timeWithProgressBar);
             panelMediaControl.Dock = DockStyle.Bottom;
-            panelMediaControl.Location = new Point(0, 456);
+            panelMediaControl.Location = new Point(0, 429);
             panelMediaControl.Name = "panelMediaControl";
-            panelMediaControl.Size = new Size(873, 74);
+            panelMediaControl.Size = new Size(873, 101);
             panelMediaControl.TabIndex = 11;
             // 
             // queuePictureBox
             // 
             queuePictureBox.BackgroundImage = Properties.Resources.list_50px;
             queuePictureBox.BackgroundImageLayout = ImageLayout.Stretch;
-            queuePictureBox.Location = new Point(65, 43);
+            queuePictureBox.Location = new Point(65, 64);
             queuePictureBox.Name = "queuePictureBox";
             queuePictureBox.Size = new Size(25, 25);
             queuePictureBox.TabIndex = 14;
@@ -250,7 +235,7 @@ namespace VlcPlayerWinforms
             // 
             stopPictureBox.BackgroundImage = Properties.Resources.stop_50px;
             stopPictureBox.BackgroundImageLayout = ImageLayout.Stretch;
-            stopPictureBox.Location = new Point(34, 43);
+            stopPictureBox.Location = new Point(34, 64);
             stopPictureBox.Name = "stopPictureBox";
             stopPictureBox.Size = new Size(25, 25);
             stopPictureBox.TabIndex = 13;
@@ -265,16 +250,16 @@ namespace VlcPlayerWinforms
             timeWithProgressBar.Dock = DockStyle.Top;
             timeWithProgressBar.Location = new Point(0, 0);
             timeWithProgressBar.Name = "timeWithProgressBar";
-            timeWithProgressBar.Size = new Size(873, 40);
+            timeWithProgressBar.Size = new Size(873, 43);
             timeWithProgressBar.TabIndex = 16;
             // 
             // labelTotalMediaTime
             // 
             labelTotalMediaTime.BackColor = Color.White;
             labelTotalMediaTime.Dock = DockStyle.Right;
-            labelTotalMediaTime.Location = new Point(824, 22);
+            labelTotalMediaTime.Location = new Point(824, 26);
             labelTotalMediaTime.Name = "labelTotalMediaTime";
-            labelTotalMediaTime.Size = new Size(49, 18);
+            labelTotalMediaTime.Size = new Size(49, 17);
             labelTotalMediaTime.TabIndex = 11;
             labelTotalMediaTime.Text = "00:00:00";
             // 
@@ -282,9 +267,9 @@ namespace VlcPlayerWinforms
             // 
             labelCurrentMediaTime.BackColor = Color.White;
             labelCurrentMediaTime.Dock = DockStyle.Left;
-            labelCurrentMediaTime.Location = new Point(0, 22);
+            labelCurrentMediaTime.Location = new Point(0, 26);
             labelCurrentMediaTime.Name = "labelCurrentMediaTime";
-            labelCurrentMediaTime.Size = new Size(49, 18);
+            labelCurrentMediaTime.Size = new Size(49, 17);
             labelCurrentMediaTime.TabIndex = 12;
             labelCurrentMediaTime.Text = "00:00:00";
             // 
@@ -300,7 +285,7 @@ namespace VlcPlayerWinforms
             mediaCustomProgressBar.ShowCur = true;
             mediaCustomProgressBar.ShowMaximun = false;
             mediaCustomProgressBar.ShowValue = CustomControls.TextPosition.None;
-            mediaCustomProgressBar.Size = new Size(873, 22);
+            mediaCustomProgressBar.Size = new Size(873, 26);
             mediaCustomProgressBar.SliderColor = Color.RoyalBlue;
             mediaCustomProgressBar.SliderHeight = 10;
             mediaCustomProgressBar.SymbolAfter = "";
@@ -313,13 +298,24 @@ namespace VlcPlayerWinforms
             updateMediaTime.Interval = 10;
             updateMediaTime.Tick += updateMediaTime_Tick;
             // 
+            // windowsMediaPlayer
+            // 
+            windowsMediaPlayer.Dock = DockStyle.Fill;
+            windowsMediaPlayer.Enabled = true;
+            windowsMediaPlayer.Location = new Point(0, 24);
+            windowsMediaPlayer.Name = "windowsMediaPlayer";
+            windowsMediaPlayer.OcxState = (AxHost.State)resources.GetObject("windowsMediaPlayer.OcxState");
+            windowsMediaPlayer.Size = new Size(709, 405);
+            windowsMediaPlayer.TabIndex = 13;
+            windowsMediaPlayer.MouseUpEvent += windowsMediaPlayer_MouseUpEvent;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.DarkSlateGray;
             ClientSize = new Size(873, 530);
-            Controls.Add(vlcControl);
+            Controls.Add(windowsMediaPlayer);
             Controls.Add(QueuePanel);
             Controls.Add(panelMediaControl);
             Controls.Add(menuStrip1);
@@ -329,8 +325,6 @@ namespace VlcPlayerWinforms
             Text = "MediaPlayer";
             Load += MainForm_Load;
             KeyDown += MainForm_KeyDown;
-            vlcControl.VlcLibDirectory = new DirectoryInfo("C:\\Program Files\\VideoLAN\\VLC");
-            ((System.ComponentModel.ISupportInitialize)vlcControl).EndInit();
             ((System.ComponentModel.ISupportInitialize)playPictureBox).EndInit();
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
@@ -338,6 +332,7 @@ namespace VlcPlayerWinforms
             ((System.ComponentModel.ISupportInitialize)queuePictureBox).EndInit();
             ((System.ComponentModel.ISupportInitialize)stopPictureBox).EndInit();
             timeWithProgressBar.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)windowsMediaPlayer).EndInit();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -345,7 +340,6 @@ namespace VlcPlayerWinforms
         #endregion
         private FlowLayoutPanel QueuePanel;
         private ImageList ImageListQueue;
-        private Vlc.DotNet.Forms.VlcControl vlcControl;
         private System.Windows.Forms.Timer timerMouseMovement;
         private PictureBox playPictureBox;
         private MenuStrip menuStrip1;
@@ -372,5 +366,6 @@ namespace VlcPlayerWinforms
         private PictureBox queuePictureBox;
         private Panel timeWithProgressBar;
         private CustomControls.CustomProgressBar mediaCustomProgressBar;
+        private AxWMPLib.AxWindowsMediaPlayer windowsMediaPlayer;
     }
 }

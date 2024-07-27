@@ -6,6 +6,12 @@ using static System.Net.Mime.MediaTypeNames;
 
 namespace VlcPlayerWinforms
 {
+    public enum TimeChange
+    {
+        Add,
+        Sub,
+        Set
+    }
     public partial class MainForm : Form
     {
         // attributes
@@ -19,29 +25,35 @@ namespace VlcPlayerWinforms
             InitializeComponent();
 
             windowsMediaPlayer.uiMode = "none";
+            windowsMediaPlayer.stretchToFit = true;
             mediaCustomProgressBar.MediaPlayer = windowsMediaPlayer;
+            mediaPlayerSlider.MediaPlayer = windowsMediaPlayer;
         }
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            // init media player + progress bar
-            loadMedia("https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4");
+            /// NEED MODIFICATION
+            LoadFilesInQueuePanel();
 
-            // init Queue Panel
+        }
+
+        /// NEED MODIFICATION
+        private void LoadFilesInQueuePanel()
+        {
             QueuePanel.AutoScroll = true;
+            Size boxSize = new(200, 50);
             for (int i = 0; i < 30; i++)
             {
-                PictureBox b = new PictureBox();
-                b.Size = new Size(200, 50);
-                b.SizeMode = PictureBoxSizeMode.StretchImage;
-                b.Image = System.Drawing.Image.FromFile("C:\\Users\\tigro\\source\\repos\\VlcPlayerWinforms\\VlcPlayerWinforms\\img\\test.png");
+                PictureBox b = new()
+                {
+                    Size = boxSize,
+                    SizeMode = PictureBoxSizeMode.StretchImage,
+                    Image = Properties.Resources.test
+                };
                 b.Click += ListPictureBox_Click;
 
                 QueuePanel.Controls.Add(b);
             }
-
-            timerMouseMovement.Enabled = false;
-
         }
 
         private void ModifyFullScreen(bool? explicitModify)
@@ -53,12 +65,14 @@ namespace VlcPlayerWinforms
                     FormBorderStyle = FormBorderStyle.Sizable;
                     WindowState = FormWindowState.Normal;
                     isFullScreen = false;
+                    menuStrip.Show();
                 }
                 else
                 {
                     FormBorderStyle = FormBorderStyle.None;
                     WindowState = FormWindowState.Maximized;
                     isFullScreen = true;
+                    menuStrip.Hide();
                 }
             }
             else
@@ -68,12 +82,14 @@ namespace VlcPlayerWinforms
                     FormBorderStyle = FormBorderStyle.Sizable;
                     WindowState = FormWindowState.Normal;
                     isFullScreen = false;
+                    menuStrip.Show();
                 }
                 else
                 {
                     FormBorderStyle = FormBorderStyle.None;
                     WindowState = FormWindowState.Maximized;
                     isFullScreen = true;
+                    menuStrip.Hide();
                 }
             }
 
@@ -84,34 +100,65 @@ namespace VlcPlayerWinforms
             MessageBox.Show("Hey");
         }
 
-        private void timer1_Tick(object sender, EventArgs e)
+        private void timerMouvementMouse_Tick(object sender, EventArgs e)
         {
             Point curPos = MousePosition;
-            if (curPos.Equals(precedentMousePosition))
+
+            Point clientPos = PointToClient(MousePosition);
+            if (clientPos.Y > windowsMediaPlayer.Location.Y && clientPos.Y < windowsMediaPlayer.Location.Y + windowsMediaPlayer.Height &&
+                clientPos.X > windowsMediaPlayer.Location.X && clientPos.X < windowsMediaPlayer.Location.X + windowsMediaPlayer.Width)
             {
-                panelMediaControl.Hide();
+                if (curPos.Equals(precedentMousePosition))
+                {
+                    Cursor.Hide();
+                    panelMediaControl.Hide();
+                }
+                else
+                {
+                    Cursor.Show();
+                    panelMediaControl.Show();
+                }
+                precedentMousePosition = curPos;
             }
-            else
+            
+        }
+
+        private void SetTime(int time, TimeChange status)
+        {
+            switch (status)
             {
-                panelMediaControl.Show();
+                case TimeChange.Add:
+                    if (windowsMediaPlayer.Ctlcontrols.currentPosition + time < windowsMediaPlayer.currentMedia.duration)
+                    {
+                        windowsMediaPlayer.Ctlcontrols.currentPosition += time;
+                        mediaCustomProgressBar.Value += time;
+                    }
+                    else
+                    {
+                        windowsMediaPlayer.Ctlcontrols.currentPosition = windowsMediaPlayer.currentMedia.duration;
+                        mediaCustomProgressBar.Value = (int)windowsMediaPlayer.currentMedia.duration;
+                    }
+                    break;
+                case TimeChange.Sub:
+                    if (windowsMediaPlayer.Ctlcontrols.currentPosition - time >= 0)
+                    {
+                        windowsMediaPlayer.Ctlcontrols.currentPosition -= time;
+                        mediaCustomProgressBar.Value -= time;
+                    }
+                    else
+                    {
+                        windowsMediaPlayer.Ctlcontrols.currentPosition = 0;
+                        mediaCustomProgressBar.Value = 0;
+                    }
+                    break;
+                case TimeChange.Set:
+                    if (time < windowsMediaPlayer.currentMedia.duration)
+                    {
+                        windowsMediaPlayer.Ctlcontrols.currentPosition = time;
+                        mediaCustomProgressBar.Value = time;
+                    }
+                    break;
             }
-            precedentMousePosition = curPos;
-        }
-
-        private void vlcControl1_MouseEnter(object sender, EventArgs e)
-        {
-            timerMouseMovement.Enabled = true;
-        }
-
-        private void vlcControl1_MouseLeave(object sender, EventArgs e)
-        {
-            timerMouseMovement.Enabled = false;
-            panelMediaControl.Show();
-        }
-
-        private void vlcControl1_DoubleClick(object sender, EventArgs e)
-        {
-            ModifyFullScreen(null);
         }
 
         private void MainForm_KeyDown(object sender, KeyEventArgs e)
@@ -131,41 +178,90 @@ namespace VlcPlayerWinforms
                     break;
 
                 case Keys.Right:
-                    if (windowsMediaPlayer.Ctlcontrols.currentPosition + 10 < windowsMediaPlayer.currentMedia.duration)
-                    {
-                        windowsMediaPlayer.Ctlcontrols.currentPosition += 10;
-                        mediaCustomProgressBar.Value += 10;
-                    }
+                    SetTime(10, TimeChange.Add);
                     break;
 
                 case Keys.Left:
-                    if (windowsMediaPlayer.Ctlcontrols.currentPosition - 10 >= 0)
-                    {
-                        windowsMediaPlayer.Ctlcontrols.currentPosition -= 10;
-                        mediaCustomProgressBar.Value -= 10;
-                    }
-                    else
-                    {
-                        windowsMediaPlayer.Ctlcontrols.currentPosition = 0;
-                        mediaCustomProgressBar.Value = 0;
-                    }
+                    SetTime(10, TimeChange.Sub);
                     break;
 
+                case Keys.Up:
+                    windowsMediaPlayer.settings.volume += 5;
+                    break;
+
+                case Keys.Down:
+                    windowsMediaPlayer.settings.volume -= 5;
+                    break;
+
+                case Keys.NumPad0:
+                case Keys.D0:
+                    SetTime(0, TimeChange.Set);
+                    break;
+
+                case Keys.NumPad1:
+                case Keys.D1:
+                    SetTime((int)(windowsMediaPlayer.currentMedia.duration * 0.1), TimeChange.Set);
+                    break;
+
+                case Keys.NumPad2:
+                case Keys.D2:
+                    SetTime((int)(windowsMediaPlayer.currentMedia.duration * 0.2), TimeChange.Set);
+                    break;
+
+                case Keys.NumPad3:
+                case Keys.D3:
+                    SetTime((int)(windowsMediaPlayer.currentMedia.duration * 0.3), TimeChange.Set);
+                    break;
+
+                case Keys.NumPad4:
+                case Keys.D4:
+                    SetTime((int)(windowsMediaPlayer.currentMedia.duration * 0.4), TimeChange.Set);
+                    break;
+
+                case Keys.NumPad5:
+                case Keys.D5:
+                    SetTime((int)(windowsMediaPlayer.currentMedia.duration * 0.5), TimeChange.Set);
+                    break;
+
+                case Keys.NumPad6:
+                case Keys.D6:
+                    SetTime((int)(windowsMediaPlayer.currentMedia.duration * 0.6), TimeChange.Set);
+                    break;
+
+                case Keys.NumPad7:
+                case Keys.D7:
+                    SetTime((int)(windowsMediaPlayer.currentMedia.duration * 0.7), TimeChange.Set);
+                    break;
+
+                case Keys.NumPad8:
+                case Keys.D8:
+                    SetTime((int)(windowsMediaPlayer.currentMedia.duration * 0.8), TimeChange.Set);
+                    break;
+
+                case Keys.NumPad9:
+                case Keys.D9:
+                    SetTime((int)(windowsMediaPlayer.currentMedia.duration * 0.9), TimeChange.Set);
+                    break;
             }
 
         }
 
         private void playPictureBox_Click(object sender, EventArgs? e)
         {
-            if (windowsMediaPlayer.playState == WMPLib.WMPPlayState.wmppsPlaying)
+            if (windowsMediaPlayer.playState == WMPPlayState.wmppsPlaying)
             {
                 windowsMediaPlayer.Ctlcontrols.pause();
                 playPictureBox.BackgroundImage = Properties.Resources.play_50px;
             }
-            else
+            else if (windowsMediaPlayer.playState == WMPPlayState.wmppsPaused)
             {
                 windowsMediaPlayer.Ctlcontrols.play();
                 playPictureBox.BackgroundImage = Properties.Resources.pause_50px;
+            }
+            else
+            {
+                // init media player + progress bar
+                loadMedia("https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4");
             }
         }
 
@@ -204,6 +300,7 @@ namespace VlcPlayerWinforms
             }
         }
 
+        /// NEED MODIFICATION
         private void ouvrirUnFichierToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var fileContent = string.Empty;
@@ -252,12 +349,14 @@ namespace VlcPlayerWinforms
 
         }
 
-
-
         private void windowsMediaPlayer_MouseUpEvent(object sender, _WMPOCXEvents_MouseUpEvent e)
         {
             playPictureBox_Click(sender, null);
         }
 
+        private void windowsMediaPlayer_DoubleClickEvent(object sender, _WMPOCXEvents_DoubleClickEvent e)
+        {
+            ModifyFullScreen(null);
+        }
     }
 }

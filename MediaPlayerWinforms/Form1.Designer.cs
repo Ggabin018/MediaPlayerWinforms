@@ -1,6 +1,6 @@
 ﻿using Vlc.DotNet.Forms;
 
-namespace VlcPlayerWinforms
+namespace MediaPlayerWinforms
 {
     partial class MainForm
     {

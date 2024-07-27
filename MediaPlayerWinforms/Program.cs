@@ -1,4 +1,4 @@
-namespace VlcPlayerWinforms
+namespace MediaPlayerWinforms
 {
     internal static class Program
     {

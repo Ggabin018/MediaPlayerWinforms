@@ -1,10 +1,10 @@
 using AxWMPLib;
 using Microsoft.VisualBasic.ApplicationServices;
-using VlcPlayerWinforms.CustomControls;
+using MediaPlayerWinforms.CustomControls;
 using WMPLib;
 using static System.Net.Mime.MediaTypeNames;
 
-namespace VlcPlayerWinforms
+namespace MediaPlayerWinforms
 {
     public enum TimeChange
     {

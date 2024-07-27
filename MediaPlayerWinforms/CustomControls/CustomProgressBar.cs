@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using AxWMPLib;
 
-namespace VlcPlayerWinforms.CustomControls
+namespace MediaPlayerWinforms.CustomControls
 {
     public enum TextPosition
     {

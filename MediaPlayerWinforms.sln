@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.10.35027.167
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "VlcPlayerWinforms", "VlcPlayerWinforms\VlcPlayerWinforms.csproj", "{A475CC88-782A-45C4-BA89-46660EBE77CC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediaPlayerWinforms", "MediaPlayerWinforms\MediaPlayerWinforms.csproj", "{A475CC88-782A-45C4-BA89-46660EBE77CC}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

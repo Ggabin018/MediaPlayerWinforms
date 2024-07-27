@@ -2,7 +2,7 @@
 using System.ComponentModel;
 using System.Drawing.Drawing2D;
 
-namespace VlcPlayerWinforms.CustomControls
+namespace MediaPlayerWinforms.CustomControls
 {
     class CustomSlider : Control
     {

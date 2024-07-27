@@ -13,7 +13,7 @@ namespace MediaPlayerWinforms.CustomControls
     }
     class CustomProgressBar : ProgressBar
     {
-        //Fields
+        // Properties
         private Color channelColor = Color.LightSteelBlue;
         private Color sliderColor = Color.RoyalBlue;
         private Color foreBackColor = Color.RoyalBlue;
@@ -24,9 +24,6 @@ namespace MediaPlayerWinforms.CustomControls
         private string symbolAfter = "";
         private bool showMaximun = false;
         private AxWindowsMediaPlayer mediaPlayer;
-
-
-        //Others
         private Rectangle prevRectText = Rectangle.Empty;
         private Rectangle prevRectBar = Rectangle.Empty;
 
@@ -148,11 +145,9 @@ namespace MediaPlayerWinforms.CustomControls
         
 
 
-        //-> Paint the background & channel
+        // Paint the background & channel
         protected override void OnPaintBackground(PaintEventArgs pevent)
         {
-
-            //Fields
             Graphics graph = pevent.Graphics;
             Rectangle rectChannel = new Rectangle(0, 0, Width, ChannelHeight);
             using (var brushChannel = new SolidBrush(channelColor))
@@ -167,7 +162,7 @@ namespace MediaPlayerWinforms.CustomControls
             }
 
         }
-        //-> Paint slider
+        // Paint slider
         protected override void OnPaint(PaintEventArgs e)
         {
             // mouse hover
@@ -205,7 +200,6 @@ namespace MediaPlayerWinforms.CustomControls
                 if (showValue != TextPosition.None) //Text
                     DrawValueText(graph, sliderWidth, rectSlider);
 
-                /// HOVER EVENT
                 // painting time near mouse 
                 if (IsHover())
                     DrawValueTime(graph);
@@ -222,14 +216,14 @@ namespace MediaPlayerWinforms.CustomControls
             }
         }
 
-        //-> Paint value text
+        // Paint value text
         private void DrawValueText(Graphics graph, int sliderWidth, Rectangle rectSlider)
         {
-            //Fields
             string text = symbolBefore + Value.ToString() + symbolAfter;
             if (showMaximun) text = text + "/" + symbolBefore + Maximum.ToString() + symbolAfter;
             var textSize = TextRenderer.MeasureText(text, Font);
             var rectText = new Rectangle(0, 0, textSize.Width, textSize.Height + 2);
+
             using (var brushText = new SolidBrush(ForeColor))
             using (var brushTextBack = new SolidBrush(foreBackColor))
             using (var textFormat = new StringFormat())
@@ -254,6 +248,7 @@ namespace MediaPlayerWinforms.CustomControls
                     case TextPosition.Sliding:
                         rectText.X = sliderWidth - textSize.Width;
                         textFormat.Alignment = StringAlignment.Center;
+
                         //Clean previous text surface
                         using (var brushClear = new SolidBrush(Parent.BackColor))
                         {
@@ -282,7 +277,9 @@ namespace MediaPlayerWinforms.CustomControls
             string text = $"{TimeSpan.FromSeconds(clientPos.X * Maximum / Width):hh\\:mm\\:ss}";
 
             var textSize = TextRenderer.MeasureText(text, Font);
+
             // textSize.Width+1 because it's too close so the last digit is not display
+            /// TO CHANGE
             var rectText = new Rectangle(0, 0, textSize.Width+1, textSize.Height + 2);
             
 
@@ -319,14 +316,6 @@ namespace MediaPlayerWinforms.CustomControls
                 Value = newTime;
                 mediaPlayer.Ctlcontrols.currentPosition = newTime;
             }
-                
-            
-        }
-
-        protected override void OnResize(EventArgs e)
-        {
-            //MessageBox.Show("resize");
-            Invalidate(true);
         }
 
         private bool IsHover()

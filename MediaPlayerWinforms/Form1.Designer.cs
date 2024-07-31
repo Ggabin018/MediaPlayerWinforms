@@ -239,6 +239,7 @@ namespace MediaPlayerWinforms
             // 
             mediaPlayerSlider.Anchor = AnchorStyles.Right;
             mediaPlayerSlider.ForeColor = Color.White;
+            mediaPlayerSlider.LabelDebug = labelTest;
             mediaPlayerSlider.Location = new Point(745, 61);
             mediaPlayerSlider.Maximum = 125;
             mediaPlayerSlider.MediaPlayer = null;

@@ -8,7 +8,6 @@ namespace MediaPlayerWinforms.CustomControls
     {
         // DEBUG
         Label labelDebug;
-        int c = 0;
 
         // Draw Properties
         private readonly LinearGradientBrush linGrBrush = new LinearGradientBrush(
@@ -76,7 +75,7 @@ namespace MediaPlayerWinforms.CustomControls
             hoverCall = new()
             {
                 Interval = 500,
-                Enabled = true,
+                Enabled = false,
             };
             hoverCall.Tick += new EventHandler(OnHoverCallTick);
         }
@@ -127,7 +126,8 @@ namespace MediaPlayerWinforms.CustomControls
         protected override void OnMouseLeave(EventArgs e)
         {
             base.OnMouseLeave(e);
-            hoverCall.Enabled = true;
+            hoverCall.Enabled = false;
+            // TODO delete text rect 
         }
 
         protected override void OnMouseDown(MouseEventArgs e)

@@ -364,3 +364,4 @@ FodyWeavers.xsd
 
 # Big Video File
 .mp4
+/MediaPlayerWinforms/tmp/video.mp4

@@ -127,7 +127,7 @@ namespace MediaPlayerWinforms.CustomControls
         {
             base.OnMouseLeave(e);
             hoverCall.Enabled = false;
-            // TODO delete text rect 
+            Invalidate();
         }
 
         protected override void OnMouseDown(MouseEventArgs e)

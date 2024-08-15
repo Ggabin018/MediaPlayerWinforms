@@ -271,8 +271,15 @@ namespace MediaPlayerWinforms
 
             //time to load media
             await Task.Delay(1000);
-
-            double duration = windowsMediaPlayer.currentMedia.duration;
+            double duration = 0;
+            int nTry = 10000;
+            while (duration == 0 && nTry > 0)
+            {
+                duration = windowsMediaPlayer.currentMedia.duration;
+                nTry--;
+            }
+            if (duration == 0)
+                throw new Exception("Duration 0 !");
             labelTotalMediaTime.Text = $"{TimeSpan.FromSeconds(duration):hh\\:mm\\:ss}";
 
             // init progress bar

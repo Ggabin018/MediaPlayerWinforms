@@ -63,6 +63,7 @@ namespace MediaPlayerWinforms
             mediaCustomProgressBar = new CustomControls.CustomProgressBar();
             updateMediaTime = new System.Windows.Forms.Timer(components);
             windowsMediaPlayer = new AxWMPLib.AxWindowsMediaPlayer();
+            historiqueToolStripMenuItem = new ToolStripMenuItem();
             ((System.ComponentModel.ISupportInitialize)playPictureBox).BeginInit();
             menuStrip.SuspendLayout();
             panelMediaControl.SuspendLayout();
@@ -77,9 +78,10 @@ namespace MediaPlayerWinforms
             QueuePanel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             QueuePanel.BackColor = Color.Honeydew;
             QueuePanel.Dock = DockStyle.Right;
-            QueuePanel.Location = new Point(718, 24);
+            QueuePanel.Location = new Point(821, 30);
+            QueuePanel.Margin = new Padding(3, 4, 3, 4);
             QueuePanel.Name = "QueuePanel";
-            QueuePanel.Size = new Size(164, 425);
+            QueuePanel.Size = new Size(187, 569);
             QueuePanel.TabIndex = 5;
             // 
             // ImageListQueue
@@ -99,115 +101,118 @@ namespace MediaPlayerWinforms
             playPictureBox.BackColor = Color.DimGray;
             playPictureBox.BackgroundImage = Properties.Resources.pause_50px;
             playPictureBox.BackgroundImageLayout = ImageLayout.Stretch;
-            playPictureBox.Location = new Point(3, 71);
+            playPictureBox.Location = new Point(3, 95);
+            playPictureBox.Margin = new Padding(3, 4, 3, 4);
             playPictureBox.Name = "playPictureBox";
-            playPictureBox.Size = new Size(25, 25);
+            playPictureBox.Size = new Size(29, 33);
             playPictureBox.TabIndex = 9;
             playPictureBox.TabStop = false;
             playPictureBox.Click += playPictureBox_Click;
             // 
             // menuStrip
             // 
+            menuStrip.ImageScalingSize = new Size(20, 20);
             menuStrip.Items.AddRange(new ToolStripItem[] { médiaToolStripMenuItem, lectureToolStripMenuItem, audioToolStripMenuItem, vidéoToolStripMenuItem });
             menuStrip.Location = new Point(0, 0);
             menuStrip.Name = "menuStrip";
-            menuStrip.Size = new Size(882, 24);
+            menuStrip.Padding = new Padding(7, 3, 0, 3);
+            menuStrip.Size = new Size(1008, 30);
             menuStrip.TabIndex = 10;
             menuStrip.Text = "menuStrip";
             // 
             // médiaToolStripMenuItem
             // 
-            médiaToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { ouvrirUnFichierToolStripMenuItem, ouvrirPlusieursFichiersToolStripMenuItem, ouvrirUnDossierToolStripMenuItem });
+            médiaToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { ouvrirUnFichierToolStripMenuItem, ouvrirPlusieursFichiersToolStripMenuItem, ouvrirUnDossierToolStripMenuItem, historiqueToolStripMenuItem });
             médiaToolStripMenuItem.Name = "médiaToolStripMenuItem";
-            médiaToolStripMenuItem.Size = new Size(52, 20);
+            médiaToolStripMenuItem.Size = new Size(65, 24);
             médiaToolStripMenuItem.Text = "Média";
             // 
             // ouvrirUnFichierToolStripMenuItem
             // 
             ouvrirUnFichierToolStripMenuItem.Name = "ouvrirUnFichierToolStripMenuItem";
-            ouvrirUnFichierToolStripMenuItem.Size = new Size(207, 22);
+            ouvrirUnFichierToolStripMenuItem.Size = new Size(254, 26);
             ouvrirUnFichierToolStripMenuItem.Text = "Ouvrir un fichier...";
             ouvrirUnFichierToolStripMenuItem.Click += ouvrirUnFichierToolStripMenuItem_Click;
             // 
             // ouvrirPlusieursFichiersToolStripMenuItem
             // 
             ouvrirPlusieursFichiersToolStripMenuItem.Name = "ouvrirPlusieursFichiersToolStripMenuItem";
-            ouvrirPlusieursFichiersToolStripMenuItem.Size = new Size(207, 22);
+            ouvrirPlusieursFichiersToolStripMenuItem.Size = new Size(254, 26);
             ouvrirPlusieursFichiersToolStripMenuItem.Text = "Ouvrir plusieurs fichiers...";
             // 
             // ouvrirUnDossierToolStripMenuItem
             // 
             ouvrirUnDossierToolStripMenuItem.Name = "ouvrirUnDossierToolStripMenuItem";
-            ouvrirUnDossierToolStripMenuItem.Size = new Size(207, 22);
+            ouvrirUnDossierToolStripMenuItem.Size = new Size(254, 26);
             ouvrirUnDossierToolStripMenuItem.Text = "Ouvrir un dossier...";
             // 
             // lectureToolStripMenuItem
             // 
             lectureToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { lireToolStripMenuItem, arrêterToolStripMenuItem, précedentToolStripMenuItem, suivantToolStripMenuItem });
             lectureToolStripMenuItem.Name = "lectureToolStripMenuItem";
-            lectureToolStripMenuItem.Size = new Size(58, 20);
+            lectureToolStripMenuItem.Size = new Size(71, 24);
             lectureToolStripMenuItem.Text = "Lecture";
             // 
             // lireToolStripMenuItem
             // 
             lireToolStripMenuItem.Name = "lireToolStripMenuItem";
-            lireToolStripMenuItem.Size = new Size(127, 22);
+            lireToolStripMenuItem.Size = new Size(158, 26);
             lireToolStripMenuItem.Text = "Lire";
             // 
             // arrêterToolStripMenuItem
             // 
             arrêterToolStripMenuItem.Name = "arrêterToolStripMenuItem";
-            arrêterToolStripMenuItem.Size = new Size(127, 22);
+            arrêterToolStripMenuItem.Size = new Size(158, 26);
             arrêterToolStripMenuItem.Text = "Arrêter";
             // 
             // précedentToolStripMenuItem
             // 
             précedentToolStripMenuItem.Name = "précedentToolStripMenuItem";
-            précedentToolStripMenuItem.Size = new Size(127, 22);
+            précedentToolStripMenuItem.Size = new Size(158, 26);
             précedentToolStripMenuItem.Text = "Précedent";
             // 
             // suivantToolStripMenuItem
             // 
             suivantToolStripMenuItem.Name = "suivantToolStripMenuItem";
-            suivantToolStripMenuItem.Size = new Size(127, 22);
+            suivantToolStripMenuItem.Size = new Size(158, 26);
             suivantToolStripMenuItem.Text = "Suivant";
             // 
             // audioToolStripMenuItem
             // 
             audioToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { augmenterLeVolumeToolStripMenuItem, réduireLeVolumeToolStripMenuItem, couperLeSonToolStripMenuItem });
             audioToolStripMenuItem.Name = "audioToolStripMenuItem";
-            audioToolStripMenuItem.Size = new Size(51, 20);
+            audioToolStripMenuItem.Size = new Size(63, 24);
             audioToolStripMenuItem.Text = "Audio";
             // 
             // augmenterLeVolumeToolStripMenuItem
             // 
             augmenterLeVolumeToolStripMenuItem.Name = "augmenterLeVolumeToolStripMenuItem";
-            augmenterLeVolumeToolStripMenuItem.Size = new Size(189, 22);
+            augmenterLeVolumeToolStripMenuItem.Size = new Size(235, 26);
             augmenterLeVolumeToolStripMenuItem.Text = "Augmenter le volume";
             // 
             // réduireLeVolumeToolStripMenuItem
             // 
             réduireLeVolumeToolStripMenuItem.Name = "réduireLeVolumeToolStripMenuItem";
-            réduireLeVolumeToolStripMenuItem.Size = new Size(189, 22);
+            réduireLeVolumeToolStripMenuItem.Size = new Size(235, 26);
             réduireLeVolumeToolStripMenuItem.Text = "Réduire le volume";
             // 
             // couperLeSonToolStripMenuItem
             // 
             couperLeSonToolStripMenuItem.Name = "couperLeSonToolStripMenuItem";
-            couperLeSonToolStripMenuItem.Size = new Size(189, 22);
+            couperLeSonToolStripMenuItem.Size = new Size(235, 26);
             couperLeSonToolStripMenuItem.Text = "Couper le son";
             // 
             // vidéoToolStripMenuItem
             // 
             vidéoToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { pleinÉcranToolStripMenuItem });
             vidéoToolStripMenuItem.Name = "vidéoToolStripMenuItem";
-            vidéoToolStripMenuItem.Size = new Size(49, 20);
+            vidéoToolStripMenuItem.Size = new Size(62, 24);
             vidéoToolStripMenuItem.Text = "Vidéo";
             // 
             // pleinÉcranToolStripMenuItem
             // 
             pleinÉcranToolStripMenuItem.Name = "pleinÉcranToolStripMenuItem";
-            pleinÉcranToolStripMenuItem.Size = new Size(132, 22);
+            pleinÉcranToolStripMenuItem.Size = new Size(164, 26);
             pleinÉcranToolStripMenuItem.Text = "Plein écran";
             // 
             // panelMediaControl
@@ -220,18 +225,19 @@ namespace MediaPlayerWinforms
             panelMediaControl.Controls.Add(playPictureBox);
             panelMediaControl.Controls.Add(timeWithProgressBar);
             panelMediaControl.Dock = DockStyle.Bottom;
-            panelMediaControl.Location = new Point(0, 449);
+            panelMediaControl.Location = new Point(0, 599);
+            panelMediaControl.Margin = new Padding(3, 4, 3, 4);
             panelMediaControl.Name = "panelMediaControl";
-            panelMediaControl.Size = new Size(882, 108);
+            panelMediaControl.Size = new Size(1008, 144);
             panelMediaControl.TabIndex = 11;
             // 
             // labelTest
             // 
             labelTest.AutoSize = true;
             labelTest.BackColor = Color.White;
-            labelTest.Location = new Point(368, 71);
+            labelTest.Location = new Point(421, 95);
             labelTest.Name = "labelTest";
-            labelTest.Size = new Size(26, 15);
+            labelTest.Size = new Size(33, 20);
             labelTest.TabIndex = 18;
             labelTest.Text = "test";
             // 
@@ -240,11 +246,12 @@ namespace MediaPlayerWinforms
             mediaPlayerSlider.Anchor = AnchorStyles.Right;
             mediaPlayerSlider.ForeColor = Color.White;
             mediaPlayerSlider.LabelDebug = labelTest;
-            mediaPlayerSlider.Location = new Point(745, 61);
+            mediaPlayerSlider.Location = new Point(851, 81);
+            mediaPlayerSlider.Margin = new Padding(3, 4, 3, 4);
             mediaPlayerSlider.Maximum = 125;
             mediaPlayerSlider.MediaPlayer = null;
             mediaPlayerSlider.Name = "mediaPlayerSlider";
-            mediaPlayerSlider.Size = new Size(125, 35);
+            mediaPlayerSlider.Size = new Size(143, 47);
             mediaPlayerSlider.TabIndex = 17;
             mediaPlayerSlider.Value = 100;
             // 
@@ -252,9 +259,10 @@ namespace MediaPlayerWinforms
             // 
             queuePictureBox.BackgroundImage = Properties.Resources.list_50px;
             queuePictureBox.BackgroundImageLayout = ImageLayout.Stretch;
-            queuePictureBox.Location = new Point(65, 71);
+            queuePictureBox.Location = new Point(74, 95);
+            queuePictureBox.Margin = new Padding(3, 4, 3, 4);
             queuePictureBox.Name = "queuePictureBox";
-            queuePictureBox.Size = new Size(25, 25);
+            queuePictureBox.Size = new Size(29, 33);
             queuePictureBox.TabIndex = 14;
             queuePictureBox.TabStop = false;
             queuePictureBox.Click += queuePictureBox_Click;
@@ -263,9 +271,10 @@ namespace MediaPlayerWinforms
             // 
             stopPictureBox.BackgroundImage = Properties.Resources.stop_50px;
             stopPictureBox.BackgroundImageLayout = ImageLayout.Stretch;
-            stopPictureBox.Location = new Point(34, 71);
+            stopPictureBox.Location = new Point(39, 95);
+            stopPictureBox.Margin = new Padding(3, 4, 3, 4);
             stopPictureBox.Name = "stopPictureBox";
-            stopPictureBox.Size = new Size(25, 25);
+            stopPictureBox.Size = new Size(29, 33);
             stopPictureBox.TabIndex = 13;
             stopPictureBox.TabStop = false;
             stopPictureBox.Click += stopPictureBox_Click;
@@ -277,17 +286,18 @@ namespace MediaPlayerWinforms
             timeWithProgressBar.Controls.Add(mediaCustomProgressBar);
             timeWithProgressBar.Dock = DockStyle.Top;
             timeWithProgressBar.Location = new Point(0, 0);
+            timeWithProgressBar.Margin = new Padding(3, 4, 3, 4);
             timeWithProgressBar.Name = "timeWithProgressBar";
-            timeWithProgressBar.Size = new Size(882, 43);
+            timeWithProgressBar.Size = new Size(1008, 57);
             timeWithProgressBar.TabIndex = 16;
             // 
             // labelTotalMediaTime
             // 
             labelTotalMediaTime.BackColor = Color.White;
             labelTotalMediaTime.Dock = DockStyle.Right;
-            labelTotalMediaTime.Location = new Point(833, 26);
+            labelTotalMediaTime.Location = new Point(952, 35);
             labelTotalMediaTime.Name = "labelTotalMediaTime";
-            labelTotalMediaTime.Size = new Size(49, 17);
+            labelTotalMediaTime.Size = new Size(56, 22);
             labelTotalMediaTime.TabIndex = 11;
             labelTotalMediaTime.Text = "00:00:00";
             // 
@@ -295,9 +305,9 @@ namespace MediaPlayerWinforms
             // 
             labelCurrentMediaTime.BackColor = Color.White;
             labelCurrentMediaTime.Dock = DockStyle.Left;
-            labelCurrentMediaTime.Location = new Point(0, 26);
+            labelCurrentMediaTime.Location = new Point(0, 35);
             labelCurrentMediaTime.Name = "labelCurrentMediaTime";
-            labelCurrentMediaTime.Size = new Size(49, 17);
+            labelCurrentMediaTime.Size = new Size(56, 22);
             labelCurrentMediaTime.TabIndex = 12;
             labelCurrentMediaTime.Text = "00:00:00";
             // 
@@ -309,11 +319,12 @@ namespace MediaPlayerWinforms
             mediaCustomProgressBar.ForeBackColor = Color.Black;
             mediaCustomProgressBar.ForeColor = Color.White;
             mediaCustomProgressBar.Location = new Point(0, 0);
+            mediaCustomProgressBar.Margin = new Padding(3, 4, 3, 4);
             mediaCustomProgressBar.MediaPlayer = null;
             mediaCustomProgressBar.Name = "mediaCustomProgressBar";
             mediaCustomProgressBar.ShowMaximun = false;
             mediaCustomProgressBar.ShowValue = CustomControls.TextPosition.None;
-            mediaCustomProgressBar.Size = new Size(882, 26);
+            mediaCustomProgressBar.Size = new Size(1008, 35);
             mediaCustomProgressBar.SliderColor = Color.LightSeaGreen;
             mediaCustomProgressBar.SliderHeight = 10;
             mediaCustomProgressBar.SymbolAfter = "";
@@ -330,26 +341,35 @@ namespace MediaPlayerWinforms
             // 
             windowsMediaPlayer.Dock = DockStyle.Fill;
             windowsMediaPlayer.Enabled = true;
-            windowsMediaPlayer.Location = new Point(0, 24);
+            windowsMediaPlayer.Location = new Point(0, 30);
+            windowsMediaPlayer.Margin = new Padding(3, 4, 3, 4);
             windowsMediaPlayer.Name = "windowsMediaPlayer";
             windowsMediaPlayer.OcxState = (AxHost.State)resources.GetObject("windowsMediaPlayer.OcxState");
-            windowsMediaPlayer.Size = new Size(718, 425);
+            windowsMediaPlayer.Size = new Size(821, 569);
             windowsMediaPlayer.TabIndex = 13;
             windowsMediaPlayer.DoubleClickEvent += windowsMediaPlayer_DoubleClickEvent;
             windowsMediaPlayer.MouseUpEvent += windowsMediaPlayer_MouseUpEvent;
             // 
+            // historiqueToolStripMenuItem
+            // 
+            historiqueToolStripMenuItem.Name = "historiqueToolStripMenuItem";
+            historiqueToolStripMenuItem.Size = new Size(254, 26);
+            historiqueToolStripMenuItem.Text = "Historique";
+            historiqueToolStripMenuItem.Click += historiqueToolStripMenuItem_Click;
+            // 
             // MainForm
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.DarkSlateGray;
-            ClientSize = new Size(882, 557);
+            ClientSize = new Size(1008, 743);
             Controls.Add(windowsMediaPlayer);
             Controls.Add(QueuePanel);
             Controls.Add(panelMediaControl);
             Controls.Add(menuStrip);
             KeyPreview = true;
             MainMenuStrip = menuStrip;
+            Margin = new Padding(3, 4, 3, 4);
             Name = "MainForm";
             Text = "MediaPlayer";
             Load += MainForm_Load;
@@ -399,5 +419,6 @@ namespace MediaPlayerWinforms
         private AxWMPLib.AxWindowsMediaPlayer windowsMediaPlayer;
         private CustomControls.CustomSlider mediaPlayerSlider;
         private Label labelTest;
+        private ToolStripMenuItem historiqueToolStripMenuItem;
     }
 }

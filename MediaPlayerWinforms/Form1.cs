@@ -120,7 +120,7 @@ namespace MediaPlayerWinforms
                 }
                 precedentMousePosition = curPos;
             }
-            
+
         }
 
         private void SetTime(int time, TimeChange status)
@@ -261,7 +261,8 @@ namespace MediaPlayerWinforms
             else
             {
                 // init media player + progress bar
-                loadMedia("https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4");
+                //loadMedia("https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4");
+                loadMedia("C:\\Users\\tigro\\source\\repos\\Ggabin018\\MediaPlayerWinforms\\MediaPlayerWinforms\\tmp\\video.mp4");
             }
         }
 
@@ -364,6 +365,11 @@ namespace MediaPlayerWinforms
         private void windowsMediaPlayer_DoubleClickEvent(object sender, _WMPOCXEvents_DoubleClickEvent e)
         {
             ModifyFullScreen(null);
+        }
+
+        private void historiqueToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }

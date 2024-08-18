@@ -20,14 +20,14 @@ namespace MediaPlayerWinforms.CustomControls
         // Others
         private int value = 100;
         private int maximum = 125;
-        private AxWindowsMediaPlayer mediaPlayer;
+        private CustomMediaPlayer mediaPlayer;
         System.Windows.Forms.Timer hoverCall;
 
         public int Value { get => value; set => this.value = value; }
         public int Maximum { get => maximum; set => maximum = value; }
 
         [Category("Custom Controls")]
-        public AxWindowsMediaPlayer MediaPlayer
+        public CustomMediaPlayer MediaPlayer
         {
             get => mediaPlayer;
             set
@@ -138,7 +138,7 @@ namespace MediaPlayerWinforms.CustomControls
 
             labelDebug.Text = newVolume.ToString();
 
-            mediaPlayer.settings.volume = newVolume;
+            mediaPlayer.Audio.Volume = newVolume;
         }
 
         private bool IsHover()

@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using AxWMPLib;
 
 namespace MediaPlayerWinforms.CustomControls
 {
@@ -23,7 +22,8 @@ namespace MediaPlayerWinforms.CustomControls
         private string symbolBefore = "";
         private string symbolAfter = "";
         private bool showMaximun = false;
-        private AxWindowsMediaPlayer mediaPlayer;
+        private CustomMediaPlayer player;
+
         private Rectangle prevRectText = Rectangle.Empty;
         private Rectangle prevRectBar = Rectangle.Empty;
 
@@ -125,16 +125,11 @@ namespace MediaPlayerWinforms.CustomControls
         }
 
         [Category("Custom Controls")]
-        public AxWindowsMediaPlayer MediaPlayer 
-        { 
-            get => mediaPlayer; 
-            set
-            { 
-                mediaPlayer = value;
-                Invalidate();
-            }
+        public CustomMediaPlayer MediaPlayer
+        {
+            get => player;
+            set => player = value; 
         }
-
 
         [Browsable(true)]
         [EditorBrowsable(EditorBrowsableState.Always)]
@@ -143,6 +138,7 @@ namespace MediaPlayerWinforms.CustomControls
         [Category("Custom Controls")]
         public override Color ForeColor { get => base.ForeColor; set => base.ForeColor = value; }
         
+
 
 
         // Paint the background & channel
@@ -311,7 +307,7 @@ namespace MediaPlayerWinforms.CustomControls
                 Point clientPos = PointToClient(MousePosition);
                 int newTime = clientPos.X * Maximum / Width;
                 Value = newTime;
-                mediaPlayer.Ctlcontrols.currentPosition = newTime;
+                MediaPlayer.PositionSeconds = newTime;
             }
         }
 

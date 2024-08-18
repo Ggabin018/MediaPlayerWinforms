@@ -1,8 +1,5 @@
-using AxWMPLib;
-using Microsoft.VisualBasic.ApplicationServices;
-using MediaPlayerWinforms.CustomControls;
-using WMPLib;
-using static System.Net.Mime.MediaTypeNames;
+using System.Diagnostics;
+using System.Net;
 
 namespace MediaPlayerWinforms
 {
@@ -15,19 +12,18 @@ namespace MediaPlayerWinforms
     public partial class MainForm : Form
     {
         // attributes
-        Point precedentMousePosition = new Point(0, 0);
+        Point precedentMousePosition = new(0, 0);
         bool isFullScreen = false;
         int totalSeconds = 0;
+        LocalDatabase localDatabase = new();
 
 
         public MainForm()
         {
             InitializeComponent();
 
-            windowsMediaPlayer.uiMode = "none";
-            windowsMediaPlayer.stretchToFit = true;
-            mediaCustomProgressBar.MediaPlayer = windowsMediaPlayer;
-            mediaPlayerSlider.MediaPlayer = windowsMediaPlayer;
+            mediaCustomProgressBar.MediaPlayer = customMediaPlayer;
+            mediaPlayerSlider.MediaPlayer = customMediaPlayer;
         }
 
         private void MainForm_Load(object sender, EventArgs e)
@@ -105,13 +101,14 @@ namespace MediaPlayerWinforms
             Point curPos = MousePosition;
 
             Point clientPos = PointToClient(MousePosition);
-            if (clientPos.Y > windowsMediaPlayer.Location.Y && clientPos.Y < windowsMediaPlayer.Location.Y + windowsMediaPlayer.Height &&
-                clientPos.X > windowsMediaPlayer.Location.X && clientPos.X < windowsMediaPlayer.Location.X + windowsMediaPlayer.Width)
+            if (clientPos.Y > customMediaPlayer.Location.Y && clientPos.Y < customMediaPlayer.Location.Y + customMediaPlayer.Height &&
+                clientPos.X > customMediaPlayer.Location.X && clientPos.X < customMediaPlayer.Location.X + customMediaPlayer.Width)
             {
+
                 if (curPos.Equals(precedentMousePosition))
                 {
-                    Cursor.Hide();
-                    panelMediaControl.Hide();
+                    /// Cursor.Hide();
+                    /// panelMediaControl.Hide();
                 }
                 else
                 {
@@ -128,33 +125,33 @@ namespace MediaPlayerWinforms
             switch (status)
             {
                 case TimeChange.Add:
-                    if (windowsMediaPlayer.Ctlcontrols.currentPosition + time < windowsMediaPlayer.currentMedia.duration)
+                    if (customMediaPlayer.PositionSeconds + time < customMediaPlayer.Duration)
                     {
-                        windowsMediaPlayer.Ctlcontrols.currentPosition += time;
+                        customMediaPlayer.PositionSeconds += time;
                         mediaCustomProgressBar.Value += time;
                     }
                     else
                     {
-                        windowsMediaPlayer.Ctlcontrols.currentPosition = windowsMediaPlayer.currentMedia.duration;
-                        mediaCustomProgressBar.Value = (int)windowsMediaPlayer.currentMedia.duration;
+                        customMediaPlayer.PositionSeconds = customMediaPlayer.Duration;
+                        mediaCustomProgressBar.Value = (int)customMediaPlayer.Duration;
                     }
                     break;
                 case TimeChange.Sub:
-                    if (windowsMediaPlayer.Ctlcontrols.currentPosition - time >= 0)
+                    if (customMediaPlayer.PositionSeconds - time >= 0)
                     {
-                        windowsMediaPlayer.Ctlcontrols.currentPosition -= time;
+                        customMediaPlayer.PositionSeconds -= time;
                         mediaCustomProgressBar.Value -= time;
                     }
                     else
                     {
-                        windowsMediaPlayer.Ctlcontrols.currentPosition = 0;
+                        customMediaPlayer.PositionSeconds = 0;
                         mediaCustomProgressBar.Value = 0;
                     }
                     break;
                 case TimeChange.Set:
-                    if (time < windowsMediaPlayer.currentMedia.duration)
+                    if (time < customMediaPlayer.Duration)
                     {
-                        windowsMediaPlayer.Ctlcontrols.currentPosition = time;
+                        customMediaPlayer.PositionSeconds = time;
                         mediaCustomProgressBar.Value = time;
                     }
                     break;
@@ -186,11 +183,13 @@ namespace MediaPlayerWinforms
                     break;
 
                 case Keys.Up:
-                    windowsMediaPlayer.settings.volume += 5;
+                    customMediaPlayer.Volume += 5;
+                    mediaPlayerSlider.Value = customMediaPlayer.Volume;
                     break;
 
                 case Keys.Down:
-                    windowsMediaPlayer.settings.volume -= 5;
+                    customMediaPlayer.Volume -= 5;
+                    mediaPlayerSlider.Value = customMediaPlayer.Volume;
                     break;
 
                 case Keys.NumPad0:
@@ -200,47 +199,47 @@ namespace MediaPlayerWinforms
 
                 case Keys.NumPad1:
                 case Keys.D1:
-                    SetTime((int)(windowsMediaPlayer.currentMedia.duration * 0.1), TimeChange.Set);
+                    SetTime((int)(customMediaPlayer.Duration * 0.1), TimeChange.Set);
                     break;
 
                 case Keys.NumPad2:
                 case Keys.D2:
-                    SetTime((int)(windowsMediaPlayer.currentMedia.duration * 0.2), TimeChange.Set);
+                    SetTime((int)(customMediaPlayer.Duration * 0.2), TimeChange.Set);
                     break;
 
                 case Keys.NumPad3:
                 case Keys.D3:
-                    SetTime((int)(windowsMediaPlayer.currentMedia.duration * 0.3), TimeChange.Set);
+                    SetTime((int)(customMediaPlayer.Duration * 0.3), TimeChange.Set);
                     break;
 
                 case Keys.NumPad4:
                 case Keys.D4:
-                    SetTime((int)(windowsMediaPlayer.currentMedia.duration * 0.4), TimeChange.Set);
+                    SetTime((int)(customMediaPlayer.Duration * 0.4), TimeChange.Set);
                     break;
 
                 case Keys.NumPad5:
                 case Keys.D5:
-                    SetTime((int)(windowsMediaPlayer.currentMedia.duration * 0.5), TimeChange.Set);
+                    SetTime((int)(customMediaPlayer.Duration * 0.5), TimeChange.Set);
                     break;
 
                 case Keys.NumPad6:
                 case Keys.D6:
-                    SetTime((int)(windowsMediaPlayer.currentMedia.duration * 0.6), TimeChange.Set);
+                    SetTime((int)(customMediaPlayer.Duration * 0.6), TimeChange.Set);
                     break;
 
                 case Keys.NumPad7:
                 case Keys.D7:
-                    SetTime((int)(windowsMediaPlayer.currentMedia.duration * 0.7), TimeChange.Set);
+                    SetTime((int)(customMediaPlayer.Duration * 0.7), TimeChange.Set);
                     break;
 
                 case Keys.NumPad8:
                 case Keys.D8:
-                    SetTime((int)(windowsMediaPlayer.currentMedia.duration * 0.8), TimeChange.Set);
+                    SetTime((int)(customMediaPlayer.Duration * 0.8), TimeChange.Set);
                     break;
 
                 case Keys.NumPad9:
                 case Keys.D9:
-                    SetTime((int)(windowsMediaPlayer.currentMedia.duration * 0.9), TimeChange.Set);
+                    SetTime((int)(customMediaPlayer.Duration * 0.9), TimeChange.Set);
                     break;
             }
 
@@ -248,35 +247,93 @@ namespace MediaPlayerWinforms
 
         private void playPictureBox_Click(object sender, EventArgs? e)
         {
-            if (windowsMediaPlayer.playState == WMPPlayState.wmppsPlaying)
+            if (customMediaPlayer.IsPlaying)
             {
-                windowsMediaPlayer.Ctlcontrols.pause();
+                customMediaPlayer.Pause();
                 playPictureBox.BackgroundImage = Properties.Resources.play_50px;
             }
-            else if (windowsMediaPlayer.playState == WMPPlayState.wmppsPaused)
+            else if (customMediaPlayer.IsPaused)
             {
-                windowsMediaPlayer.Ctlcontrols.play();
+                customMediaPlayer.Play();
                 playPictureBox.BackgroundImage = Properties.Resources.pause_50px;
             }
             else
             {
                 // init media player + progress bar
-                //loadMedia("https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4");
-                loadMedia("C:\\Users\\tigro\\source\\repos\\Ggabin018\\MediaPlayerWinforms\\MediaPlayerWinforms\\tmp\\video.mp4");
+                //loadMediaAndPlay("https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4");
+                loadMediaAndPlay("C:\\Users\\tigro\\source\\repos\\MediaPlayerWinforms\\MediaPlayerWinforms\\tmp\\video.mp4");
             }
         }
 
-        private async void loadMedia(string url)
+        private async void loadMediaAndPlay(string url)
         {
-            windowsMediaPlayer.URL = url;
+            Debug.WriteLine("LOAD MEDIA AND PLAY");
+
+            string URL = "";
+            string name = "";
+
+            // Test if it is a good file
+            if (url.StartsWith("http://") || url.StartsWith("https://"))
+            {
+                try
+                {
+                    HttpClient client = new();
+
+                    // Envoyer une requête HEAD pour récupérer uniquement les en-têtes du fichier
+                    using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Head, url);
+                    using HttpResponseMessage response = await client.SendAsync(request);
+
+                    response.EnsureSuccessStatusCode();
+
+                    // Vérifier le type MIME pour s'assurer que c'est une vidéo
+                    string contentType = response.Content.Headers.ContentType.MediaType.ToLowerInvariant();
+                    if (contentType.StartsWith("video/"))
+                    {
+                        URL = url;
+                        Uri uri = new Uri(url);
+                        name = Path.GetFileName(uri.LocalPath);
+                    }
+                }
+                catch (WebException)
+                {
+                    throw new Exception("Erreur lors de la requête (par exemple, le fichier n'existe pas)");
+                }
+                if (URL == "")
+                    throw new Exception("Le fichier en ligne n'existe pas ou n'est pas une vidéo");
+            }
+            else
+            {
+                if (File.Exists(url))
+                {
+                    string[] videoExtensions = { ".mp4", ".avi", ".mov", ".mkv", ".wmv", ".webm" };
+                    string fileExtension = Path.GetExtension(url).ToLower();
+
+                    if (videoExtensions.Contains(fileExtension))
+                    {
+                        URL = url;
+                        name = Path.GetFileName(url);
+                    }
+                }
+                if (URL == "")
+                    throw new Exception("Le fichier local n'existe pas ou n'est pas une vidéo");
+            }
+
+
+            /// Create next to assert if Play() bug or url is incorrect because of the compression
+            customMediaPlayer.Play(uri: new Uri(URL));
+            Debug.WriteLine("CELA PASSE !");
+
+            localDatabase.AddToHistoric(name, URL);
 
             //time to load media
             await Task.Delay(1000);
+
             double duration = 0;
-            int nTry = 10000;
+            int nTry = 100;
             while (duration == 0 && nTry > 0)
             {
-                duration = windowsMediaPlayer.currentMedia.duration;
+                await Task.Delay(10);
+                duration = customMediaPlayer.Duration;
                 nTry--;
             }
             if (duration == 0)
@@ -290,25 +347,24 @@ namespace MediaPlayerWinforms
             mediaCustomProgressBar.Value = 0;
             mediaCustomProgressBar.Step = 1;
 
+            customMediaPlayer.Video.IsKeyInputEnabled = true;
+            //customMediaPlayer.Video.IsMouseInputEnabled = false;
 
         }
 
         private void updateMediaTime_Tick(object sender, EventArgs e)
         {
-            if (windowsMediaPlayer.playState == WMPPlayState.wmppsPlaying)
+            if (customMediaPlayer.IsPlaying)
             {
-                /// BUG ON DISPLAY CURT, LATE ON REALTIME
                 // Update media time display
-                double currentPosition = windowsMediaPlayer.Ctlcontrols.currentPosition;
+                double currentPosition = customMediaPlayer.PositionSeconds;
                 labelCurrentMediaTime.Text = $"{TimeSpan.FromSeconds(currentPosition):hh\\:mm\\:ss}";
 
                 // Update progress bar
                 mediaCustomProgressBar.Value = (int)currentPosition;
-
             }
         }
 
-        /// NEED MODIFICATION
         private void ouvrirUnFichierToolStripMenuItem_Click(object sender, EventArgs e)
         {
             var fileContent = string.Empty;
@@ -316,9 +372,7 @@ namespace MediaPlayerWinforms
 
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
-                openFileDialog.InitialDirectory = "c:\\";
-                openFileDialog.Filter = "txt files (*.txt)|*.txt|All files (*.*)|*.*";
-                openFileDialog.FilterIndex = 2;
+                openFileDialog.Filter = "video files|*.mp4;*.avi;*.mov;*.mkv;*.wmv;*.webm|All files (*.*)|*.*";
                 openFileDialog.RestoreDirectory = true;
 
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
@@ -326,22 +380,36 @@ namespace MediaPlayerWinforms
                     //Get the path of specified file
                     filePath = openFileDialog.FileName;
 
-                    //Read the contents of the file into a stream
-                    var fileStream = openFileDialog.OpenFile();
+                    loadMediaAndPlay(filePath);
+                }
+            }
+        }
 
-                    using (StreamReader reader = new StreamReader(fileStream))
+        private void ouvrirPlusieursFichiersToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (OpenFileDialog openFileDialog = new OpenFileDialog())
+            {
+                openFileDialog.Filter = "video files|*.mp4;*.avi;*.mov;*.mkv;*.wmv;*.webm|All files (*.*)|*.*";
+                openFileDialog.RestoreDirectory = true;
+                openFileDialog.Multiselect = true;  // Enable multi-selection
+
+                if (openFileDialog.ShowDialog() == DialogResult.OK)
+                {
+                    // Iterate through the selected files
+                    string[] filePaths = openFileDialog.FileNames;
+                    loadMediaAndPlay(filePaths[0]);
+                    for (int i = 1; i < filePaths.Length; i++)
                     {
-                        fileContent = reader.ReadToEnd();
+                        customMediaPlayer.AddToQueue(filePaths[i]);
                     }
                 }
             }
-            Text = filePath;
-            MessageBox.Show(fileContent, "File Content at path: " + filePath, MessageBoxButtons.OK);
         }
+
 
         private void stopPictureBox_Click(object sender, EventArgs e)
         {
-            windowsMediaPlayer.Ctlcontrols.stop();
+            customMediaPlayer.Stop();
         }
 
         private void queuePictureBox_Click(object sender, EventArgs e)
@@ -357,19 +425,60 @@ namespace MediaPlayerWinforms
 
         }
 
-        private void windowsMediaPlayer_MouseUpEvent(object sender, _WMPOCXEvents_MouseUpEvent e)
+
+        private void customMediaPlayer_Click(object sender, EventArgs e)
         {
             playPictureBox_Click(sender, null);
         }
 
-        private void windowsMediaPlayer_DoubleClickEvent(object sender, _WMPOCXEvents_DoubleClickEvent e)
+        private void panelMediaControl_MouseEnter(object sender, EventArgs e)
         {
-            ModifyFullScreen(null);
+            Cursor.Show();
         }
 
-        private void historiqueToolStripMenuItem_Click(object sender, EventArgs e)
+        private void historiqueToolStripMenuItem_MouseHover(object sender, EventArgs e)
         {
+            historiqueToolStripMenuItem.DropDownItems.Clear();
 
+            var lastModifiedEntries = localDatabase.GetLast10HistoricEntries();
+
+            foreach (var entry in lastModifiedEntries)
+            {
+                ToolStripMenuItem menuItem = new()
+                {
+                    Text = $"Name: {entry.Name}, Last Modified: {entry.LastModified}",  // Set the text for the menu item
+                    Tag = entry  // Store the entry in the Tag property for future reference
+                };
+
+                menuItem.Click += (s, ev) =>
+                {
+                    var clickedItem = (ToolStripMenuItem)s;
+                    (string name, string path, DateTime lastModified) historicEntry = (ValueTuple<string, string, DateTime>)clickedItem.Tag;
+
+                    loadMediaAndPlay(historicEntry.path);
+                };
+
+                historiqueToolStripMenuItem.DropDownItems.Add(menuItem);
+            }
+
+            // If no entries are found, add a placeholder item
+            if (lastModifiedEntries.Count == 0)
+            {
+                ToolStripMenuItem emptyItem = new ToolStripMenuItem
+                {
+                    Text = "No recent history found"
+                };
+                historiqueToolStripMenuItem.DropDownItems.Add(emptyItem);
+            }
+        }
+
+        private void customMediaPlayer_EndReached(object sender, Vlc.DotNet.Core.VlcMediaPlayerEndReachedEventArgs e)
+        {
+            Debug.WriteLine("END REACH");
+
+            string? path = customMediaPlayer.Next();
+            if (path != null)
+                loadMediaAndPlay(path);
         }
     }
 }

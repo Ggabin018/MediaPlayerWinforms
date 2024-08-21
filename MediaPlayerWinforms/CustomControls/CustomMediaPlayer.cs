@@ -7,8 +7,8 @@ namespace MediaPlayerWinforms.CustomControls
 {
     class CustomMediaPlayer : Vlc.DotNet.Forms.VlcControl
     {
-        Queue<string> _queue = new Queue<string>();
-        Stack<string> _stack = new Stack<string>();
+        List<string> _listNextVideos = new List<string>();
+        Stack<string> _stackPrecedentVideos = new Stack<string>();
 
         public CustomMediaPlayer() : base()
         {
@@ -47,23 +47,33 @@ namespace MediaPlayerWinforms.CustomControls
 
         public void AddToQueue(string path)
         {
-            _queue.Enqueue(path);
-        }
-
-        public void AddsToQueue(IEnumerable<string> paths)
-        {
-            foreach (string path in paths)
-                AddToQueue(path);
+            _listNextVideos.Add(path);
         }
 
         public string? Next()
         {
-            if (_queue.Count == 0)
+            if (_listNextVideos.Count == 0)
                 return null;
-            string path = _queue.Dequeue();
-            _stack.Push(path);
+            string path = _listNextVideos[0];
+            _listNextVideos.RemoveAt(0);
+            _stackPrecedentVideos.Push(path);
             return path;
         }
 
+        public string? Precedent()
+        {
+            if (_stackPrecedentVideos.Count == 0)
+                return null;
+            string path = _stackPrecedentVideos.Pop();
+            _listNextVideos.Insert(0, path);
+            return path;
+        }
+
+        public void OnClickProgressBarForMediaPlayer(int newTime)
+        {
+            PositionSeconds = newTime;
+        }
+
+        public void OnMouseDownForMediaPlayer(int newVolume) => Volume = newVolume;
     }
 }

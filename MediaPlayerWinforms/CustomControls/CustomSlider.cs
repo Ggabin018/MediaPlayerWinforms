@@ -20,22 +20,12 @@ namespace MediaPlayerWinforms.CustomControls
         // Others
         private int value = 100;
         private int maximum = 125;
-        private CustomMediaPlayer mediaPlayer;
         System.Windows.Forms.Timer hoverCall;
+
+        public event Action<int> OnMouseDownForMediaPlayer;
 
         public int Value { get => value; set => this.value = value; }
         public int Maximum { get => maximum; set => maximum = value; }
-
-        [Category("Custom Controls")]
-        public CustomMediaPlayer MediaPlayer
-        {
-            get => mediaPlayer;
-            set
-            {
-                mediaPlayer = value;
-                Invalidate();
-            }
-        }
 
         [Category("Custom Controls")]
         public Label LabelDebug { get => labelDebug; set => labelDebug = value; }
@@ -138,7 +128,7 @@ namespace MediaPlayerWinforms.CustomControls
 
             labelDebug.Text = newVolume.ToString();
 
-            mediaPlayer.Audio.Volume = newVolume;
+            OnMouseDownForMediaPlayer.Invoke(newVolume);
         }
 
         private bool IsHover()

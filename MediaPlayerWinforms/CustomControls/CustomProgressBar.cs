@@ -22,10 +22,11 @@ namespace MediaPlayerWinforms.CustomControls
         private string symbolBefore = "";
         private string symbolAfter = "";
         private bool showMaximun = false;
-        private CustomMediaPlayer player;
 
         private Rectangle prevRectText = Rectangle.Empty;
         private Rectangle prevRectBar = Rectangle.Empty;
+
+        public event Action<int> OnClickProgressBarForMediaPlayer;
 
 
         public CustomProgressBar()
@@ -122,13 +123,6 @@ namespace MediaPlayerWinforms.CustomControls
                 showMaximun = value;
                 Invalidate();
             }
-        }
-
-        [Category("Custom Controls")]
-        public CustomMediaPlayer MediaPlayer
-        {
-            get => player;
-            set => player = value; 
         }
 
         [Browsable(true)]
@@ -307,7 +301,7 @@ namespace MediaPlayerWinforms.CustomControls
                 Point clientPos = PointToClient(MousePosition);
                 int newTime = clientPos.X * Maximum / Width;
                 Value = newTime;
-                MediaPlayer.PositionSeconds = newTime;
+                OnClickProgressBarForMediaPlayer.Invoke(newTime);
             }
         }
 

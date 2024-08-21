@@ -22,34 +22,13 @@ namespace MediaPlayerWinforms
         {
             InitializeComponent();
 
-            mediaCustomProgressBar.MediaPlayer = customMediaPlayer;
-            mediaPlayerSlider.MediaPlayer = customMediaPlayer;
+            // Link event
+            mediaCustomProgressBar.OnClickProgressBarForMediaPlayer += customMediaPlayer.OnClickProgressBarForMediaPlayer;
+            mediaPlayerSlider.OnMouseDownForMediaPlayer += customMediaPlayer.OnMouseDownForMediaPlayer;
         }
 
         private void MainForm_Load(object sender, EventArgs e)
         {
-            /// NEED MODIFICATION
-            LoadFilesInQueuePanel();
-
-        }
-
-        /// NEED MODIFICATION
-        private void LoadFilesInQueuePanel()
-        {
-            QueuePanel.AutoScroll = true;
-            Size boxSize = new(200, 50);
-            for (int i = 0; i < 30; i++)
-            {
-                PictureBox b = new()
-                {
-                    Size = boxSize,
-                    SizeMode = PictureBoxSizeMode.StretchImage,
-                    Image = Properties.Resources.test
-                };
-                b.Click += ListPictureBox_Click;
-
-                QueuePanel.Controls.Add(b);
-            }
         }
 
         private void ModifyFullScreen(bool? explicitModify)
@@ -89,11 +68,6 @@ namespace MediaPlayerWinforms
                 }
             }
 
-        }
-
-        private void ListPictureBox_Click(object? sender, EventArgs e)
-        {
-            MessageBox.Show("Hey");
         }
 
         private void timerMouvementMouse_Tick(object sender, EventArgs e)
@@ -377,7 +351,7 @@ namespace MediaPlayerWinforms
 
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    //Get the path of specified file
+                    //Get the _path of specified file
                     filePath = openFileDialog.FileName;
 
                     loadMediaAndPlay(filePath);
@@ -398,9 +372,11 @@ namespace MediaPlayerWinforms
                     // Iterate through the selected files
                     string[] filePaths = openFileDialog.FileNames;
                     loadMediaAndPlay(filePaths[0]);
+                    customQueuePanel.Add(filePaths[0]);
                     for (int i = 1; i < filePaths.Length; i++)
                     {
                         customMediaPlayer.AddToQueue(filePaths[i]);
+                        customQueuePanel.Add(filePaths[i]);
                     }
                 }
             }
@@ -414,13 +390,13 @@ namespace MediaPlayerWinforms
 
         private void queuePictureBox_Click(object sender, EventArgs e)
         {
-            if (QueuePanel.Visible)
+            if (customQueuePanel.Visible)
             {
-                QueuePanel.Hide();
+                customQueuePanel.Hide();
             }
             else
             {
-                QueuePanel.Show();
+                customQueuePanel.Show();
             }
 
         }
@@ -477,8 +453,38 @@ namespace MediaPlayerWinforms
             Debug.WriteLine("END REACH");
 
             string? path = customMediaPlayer.Next();
+
             if (path != null)
+            {
+                customQueuePanel.Next();
                 loadMediaAndPlay(path);
+            }
+        }
+
+        private void flushHistoryToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            localDatabase.ClearHistory();
+        }
+
+        private void precedentPictureBox_Click(object sender, EventArgs e)
+        {
+            string? path = customMediaPlayer.Precedent();
+            if (path != null)
+            {
+                customQueuePanel.Precedent(path);
+                loadMediaAndPlay(path);
+            }
+        }
+
+        private void NextPictureBox_Click(object sender, EventArgs e)
+        {
+            string? path = customMediaPlayer.Next();
+
+            if (path != null)
+            {
+                customQueuePanel.Next();
+                loadMediaAndPlay(path);
+            }
         }
     }
 }

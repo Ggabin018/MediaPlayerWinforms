@@ -31,7 +31,6 @@ namespace MediaPlayerWinforms
         private void InitializeComponent()
         {
             components = new System.ComponentModel.Container();
-            QueuePanel = new FlowLayoutPanel();
             ImageListQueue = new ImageList(components);
             timerMouseMovement = new System.Windows.Forms.Timer(components);
             playPictureBox = new PictureBox();
@@ -52,7 +51,11 @@ namespace MediaPlayerWinforms
             couperLeSonToolStripMenuItem = new ToolStripMenuItem();
             vidéoToolStripMenuItem = new ToolStripMenuItem();
             pleinÉcranToolStripMenuItem = new ToolStripMenuItem();
+            optionsToolStripMenuItem = new ToolStripMenuItem();
+            flushHistoryToolStripMenuItem = new ToolStripMenuItem();
             panelMediaControl = new Panel();
+            NextPictureBox = new PictureBox();
+            precedentPictureBox = new PictureBox();
             labelTest = new Label();
             mediaPlayerSlider = new CustomControls.CustomSlider();
             queuePictureBox = new PictureBox();
@@ -63,24 +66,17 @@ namespace MediaPlayerWinforms
             mediaCustomProgressBar = new CustomControls.CustomProgressBar();
             updateMediaTime = new System.Windows.Forms.Timer(components);
             customMediaPlayer = new CustomControls.CustomMediaPlayer();
+            customQueuePanel = new CustomControls.CustomQueuePanel();
             ((System.ComponentModel.ISupportInitialize)playPictureBox).BeginInit();
             menuStrip.SuspendLayout();
             panelMediaControl.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)NextPictureBox).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)precedentPictureBox).BeginInit();
             ((System.ComponentModel.ISupportInitialize)queuePictureBox).BeginInit();
             ((System.ComponentModel.ISupportInitialize)stopPictureBox).BeginInit();
             timeWithProgressBar.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)customMediaPlayer).BeginInit();
             SuspendLayout();
-            // 
-            // QueuePanel
-            // 
-            QueuePanel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            QueuePanel.BackColor = Color.Honeydew;
-            QueuePanel.Dock = DockStyle.Right;
-            QueuePanel.Location = new Point(718, 24);
-            QueuePanel.Name = "QueuePanel";
-            QueuePanel.Size = new Size(164, 425);
-            QueuePanel.TabIndex = 5;
             // 
             // ImageListQueue
             // 
@@ -109,7 +105,7 @@ namespace MediaPlayerWinforms
             // menuStrip
             // 
             menuStrip.ImageScalingSize = new Size(20, 20);
-            menuStrip.Items.AddRange(new ToolStripItem[] { médiaToolStripMenuItem, lectureToolStripMenuItem, audioToolStripMenuItem, vidéoToolStripMenuItem });
+            menuStrip.Items.AddRange(new ToolStripItem[] { médiaToolStripMenuItem, lectureToolStripMenuItem, audioToolStripMenuItem, vidéoToolStripMenuItem, optionsToolStripMenuItem });
             menuStrip.Location = new Point(0, 0);
             menuStrip.Name = "menuStrip";
             menuStrip.Size = new Size(882, 24);
@@ -219,9 +215,25 @@ namespace MediaPlayerWinforms
             pleinÉcranToolStripMenuItem.Size = new Size(132, 22);
             pleinÉcranToolStripMenuItem.Text = "Plein écran";
             // 
+            // optionsToolStripMenuItem
+            // 
+            optionsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { flushHistoryToolStripMenuItem });
+            optionsToolStripMenuItem.Name = "optionsToolStripMenuItem";
+            optionsToolStripMenuItem.Size = new Size(56, 20);
+            optionsToolStripMenuItem.Text = "Option";
+            // 
+            // flushHistoryToolStripMenuItem
+            // 
+            flushHistoryToolStripMenuItem.Name = "flushHistoryToolStripMenuItem";
+            flushHistoryToolStripMenuItem.Size = new Size(143, 22);
+            flushHistoryToolStripMenuItem.Text = "Flush History";
+            flushHistoryToolStripMenuItem.Click += flushHistoryToolStripMenuItem_Click;
+            // 
             // panelMediaControl
             // 
             panelMediaControl.BackColor = Color.DimGray;
+            panelMediaControl.Controls.Add(NextPictureBox);
+            panelMediaControl.Controls.Add(precedentPictureBox);
             panelMediaControl.Controls.Add(labelTest);
             panelMediaControl.Controls.Add(mediaPlayerSlider);
             panelMediaControl.Controls.Add(queuePictureBox);
@@ -234,6 +246,28 @@ namespace MediaPlayerWinforms
             panelMediaControl.Size = new Size(882, 108);
             panelMediaControl.TabIndex = 11;
             panelMediaControl.MouseEnter += panelMediaControl_MouseEnter;
+            // 
+            // NextPictureBox
+            // 
+            NextPictureBox.BackgroundImage = Properties.Resources.next_50;
+            NextPictureBox.BackgroundImageLayout = ImageLayout.Stretch;
+            NextPictureBox.Location = new Point(127, 71);
+            NextPictureBox.Name = "NextPictureBox";
+            NextPictureBox.Size = new Size(25, 25);
+            NextPictureBox.TabIndex = 20;
+            NextPictureBox.TabStop = false;
+            NextPictureBox.Click += NextPictureBox_Click;
+            // 
+            // precedentPictureBox
+            // 
+            precedentPictureBox.BackgroundImage = Properties.Resources.precedent_50;
+            precedentPictureBox.BackgroundImageLayout = ImageLayout.Stretch;
+            precedentPictureBox.Location = new Point(96, 71);
+            precedentPictureBox.Name = "precedentPictureBox";
+            precedentPictureBox.Size = new Size(25, 25);
+            precedentPictureBox.TabIndex = 19;
+            precedentPictureBox.TabStop = false;
+            precedentPictureBox.Click += precedentPictureBox_Click;
             // 
             // labelTest
             // 
@@ -252,7 +286,6 @@ namespace MediaPlayerWinforms
             mediaPlayerSlider.LabelDebug = labelTest;
             mediaPlayerSlider.Location = new Point(745, 61);
             mediaPlayerSlider.Maximum = 125;
-            mediaPlayerSlider.MediaPlayer = null;
             mediaPlayerSlider.Name = "mediaPlayerSlider";
             mediaPlayerSlider.Size = new Size(125, 35);
             mediaPlayerSlider.TabIndex = 17;
@@ -319,7 +352,6 @@ namespace MediaPlayerWinforms
             mediaCustomProgressBar.ForeBackColor = Color.Black;
             mediaCustomProgressBar.ForeColor = Color.White;
             mediaCustomProgressBar.Location = new Point(0, 0);
-            mediaCustomProgressBar.MediaPlayer = null;
             mediaCustomProgressBar.Name = "mediaCustomProgressBar";
             mediaCustomProgressBar.ShowMaximun = false;
             mediaCustomProgressBar.ShowValue = CustomControls.TextPosition.None;
@@ -343,7 +375,7 @@ namespace MediaPlayerWinforms
             customMediaPlayer.Location = new Point(0, 24);
             customMediaPlayer.Name = "customMediaPlayer";
             customMediaPlayer.PositionSeconds = 0D;
-            customMediaPlayer.Size = new Size(718, 425);
+            customMediaPlayer.Size = new Size(882, 425);
             customMediaPlayer.Spu = -1;
             customMediaPlayer.TabIndex = 12;
             customMediaPlayer.Text = "customMediaPlayer1";
@@ -351,14 +383,26 @@ namespace MediaPlayerWinforms
             customMediaPlayer.EndReached += customMediaPlayer_EndReached;
             customMediaPlayer.Click += customMediaPlayer_Click;
             // 
+            // customQueuePanel
+            // 
+            customQueuePanel.AutoScroll = true;
+            customQueuePanel.AutoSize = true;
+            customQueuePanel.BoxSize = new Size(200, 50);
+            customQueuePanel.Dock = DockStyle.Right;
+            customQueuePanel.Location = new Point(882, 24);
+            customQueuePanel.MaxNumberOfPanel = 30;
+            customQueuePanel.Name = "customQueuePanel";
+            customQueuePanel.Size = new Size(0, 425);
+            customQueuePanel.TabIndex = 13;
+            // 
             // MainForm
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.DarkSlateGray;
             ClientSize = new Size(882, 557);
+            Controls.Add(customQueuePanel);
             Controls.Add(customMediaPlayer);
-            Controls.Add(QueuePanel);
             Controls.Add(panelMediaControl);
             Controls.Add(menuStrip);
             KeyPreview = true;
@@ -372,6 +416,8 @@ namespace MediaPlayerWinforms
             menuStrip.PerformLayout();
             panelMediaControl.ResumeLayout(false);
             panelMediaControl.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)NextPictureBox).EndInit();
+            ((System.ComponentModel.ISupportInitialize)precedentPictureBox).EndInit();
             ((System.ComponentModel.ISupportInitialize)queuePictureBox).EndInit();
             ((System.ComponentModel.ISupportInitialize)stopPictureBox).EndInit();
             timeWithProgressBar.ResumeLayout(false);
@@ -381,7 +427,6 @@ namespace MediaPlayerWinforms
         }
 
         #endregion
-        private FlowLayoutPanel QueuePanel;
         private ImageList ImageListQueue;
         private System.Windows.Forms.Timer timerMouseMovement;
         private PictureBox playPictureBox;
@@ -413,5 +458,10 @@ namespace MediaPlayerWinforms
         private Label labelTest;
         private ToolStripMenuItem historiqueToolStripMenuItem;
         private CustomControls.CustomMediaPlayer customMediaPlayer;
+        private CustomControls.CustomQueuePanel customQueuePanel;
+        private ToolStripMenuItem optionsToolStripMenuItem;
+        private ToolStripMenuItem flushHistoryToolStripMenuItem;
+        private PictureBox precedentPictureBox;
+        private PictureBox NextPictureBox;
     }
 }

@@ -12,6 +12,8 @@ namespace MediaPlayerWinforms.CustomControls
         private Size _boxSize = new(200, 50);
         private List<CustomPictureBox> _listButtons = [];
 
+        public event Action<string> LoadAndPlay;
+
         [Category("Custom Controls")]
         public int MaxNumberOfPanel { get => _maxNumberOfPanel; set => _maxNumberOfPanel = value; }
 
@@ -20,11 +22,15 @@ namespace MediaPlayerWinforms.CustomControls
 
         public CustomQueuePanel() => AutoScroll = true;
 
-
+        private void RemoveControl(Control control)
+        {
+            Controls.Remove(control);
+            control.Dispose();
+        }
         public void Next()
         {
             if (_listButtons.Count > 0)
-                Controls.Remove(_listButtons[0]);
+                RemoveControl(_listButtons[0]);
             else
                 Debug.WriteLine("_listButtons Empty");
         }
@@ -32,6 +38,8 @@ namespace MediaPlayerWinforms.CustomControls
         public void Precedent(string path)
         {
             CustomPictureBox pb = new(path, BoxSize);
+            pb.LoadAndPlay += LoadAndPlay;
+
             _listButtons.Insert(0, pb);
             Controls.Add(pb);
             Controls.SetChildIndex(pb,0);
@@ -40,10 +48,28 @@ namespace MediaPlayerWinforms.CustomControls
         public void Add(string path)
         {
             CustomPictureBox pb = new(path, BoxSize);
+            pb.LoadAndPlay += LoadAndPlay;
+
             _listButtons.Add(pb);
             Controls.Add(pb);
         }
 
-
+        public void GoToThisVideoInQueuePanel(string path)
+        {
+            foreach (Control control in Controls)
+            {
+                if (control is CustomPictureBox)
+                {
+                    CustomPictureBox customPictureBox = (CustomPictureBox)control;
+                    if (customPictureBox.VideoPath == path)
+                    {
+                        Add(path);
+                        break;
+                    }
+                    else
+                        RemoveControl(customPictureBox);
+                }
+            }
+        }
     }
 }

@@ -17,6 +17,8 @@ namespace MediaPlayerWinforms
         int totalSeconds = 0;
         LocalDatabase localDatabase = new();
 
+        private static readonly Mutex mutexSetTime = new Mutex();
+
 
         public MainForm()
         {
@@ -25,10 +27,10 @@ namespace MediaPlayerWinforms
             // Link event
             mediaCustomProgressBar.OnClickProgressBarForMediaPlayer += customMediaPlayer.OnClickProgressBarForMediaPlayer;
             mediaPlayerSlider.OnMouseDownForMediaPlayer += customMediaPlayer.OnMouseDownForMediaPlayer;
-        }
-
-        private void MainForm_Load(object sender, EventArgs e)
-        {
+            customMediaPlayer.LocalDatabaseAddToHistoric += localDatabase.AddToHistoric;
+            customMediaPlayer.InitProgressBar += mediaCustomProgressBar.InitProgressBar;
+            customQueuePanel.LoadAndPlay += customMediaPlayer.LoadMediaAndPlay;
+            customMediaPlayer.GoToThisVideoInQueuePanel += customQueuePanel.GoToThisVideoInQueuePanel;
         }
 
         private void ModifyFullScreen(bool? explicitModify)
@@ -96,40 +98,47 @@ namespace MediaPlayerWinforms
 
         private void SetTime(int time, TimeChange status)
         {
-            switch (status)
+            mutexSetTime.WaitOne();
+
+            try
             {
-                case TimeChange.Add:
-                    if (customMediaPlayer.PositionSeconds + time < customMediaPlayer.Duration)
-                    {
-                        customMediaPlayer.PositionSeconds += time;
-                        mediaCustomProgressBar.Value += time;
-                    }
-                    else
-                    {
-                        customMediaPlayer.PositionSeconds = customMediaPlayer.Duration;
-                        mediaCustomProgressBar.Value = (int)customMediaPlayer.Duration;
-                    }
-                    break;
-                case TimeChange.Sub:
-                    if (customMediaPlayer.PositionSeconds - time >= 0)
-                    {
-                        customMediaPlayer.PositionSeconds -= time;
-                        mediaCustomProgressBar.Value -= time;
-                    }
-                    else
-                    {
-                        customMediaPlayer.PositionSeconds = 0;
-                        mediaCustomProgressBar.Value = 0;
-                    }
-                    break;
-                case TimeChange.Set:
-                    if (time < customMediaPlayer.Duration)
-                    {
-                        customMediaPlayer.PositionSeconds = time;
-                        mediaCustomProgressBar.Value = time;
-                    }
-                    break;
+                switch (status)
+                {
+                    case TimeChange.Add:
+                        if (customMediaPlayer.PositionSeconds + time < customMediaPlayer.Duration)
+                        {
+                            customMediaPlayer.PositionSeconds += time;
+                            mediaCustomProgressBar.Value += time;
+                        }
+                        else
+                        {
+                            customMediaPlayer.PositionSeconds = customMediaPlayer.Duration;
+                            mediaCustomProgressBar.Value = (int)customMediaPlayer.Duration;
+                        }
+                        break;
+                    case TimeChange.Sub:
+                        if (customMediaPlayer.PositionSeconds - time >= 0)
+                        {
+                            customMediaPlayer.PositionSeconds -= time;
+                            mediaCustomProgressBar.Value -= time;
+                        }
+                        else
+                        {
+                            customMediaPlayer.PositionSeconds = 0;
+                            mediaCustomProgressBar.Value = 0;
+                        }
+                        break;
+                    case TimeChange.Set:
+                        if (time < customMediaPlayer.Duration)
+                        {
+                            customMediaPlayer.PositionSeconds = time;
+                            mediaCustomProgressBar.Value = time;
+                        }
+                        break;
+                }
             }
+            finally { mutexSetTime.ReleaseMutex(); }
+            
         }
 
         private void MainForm_KeyDown(object sender, KeyEventArgs e)
@@ -144,26 +153,45 @@ namespace MediaPlayerWinforms
                     playPictureBox_Click(sender, e);
                     break;
 
-                case Keys.F11:
+                case Keys.F11: 
+                case Keys.F:
                     ModifyFullScreen(null);
                     break;
 
-                case Keys.Right:
+                case Keys.Right: 
+                case Keys.D:
+                    // forward skip in video
                     SetTime(10, TimeChange.Add);
                     break;
 
-                case Keys.Left:
+                case Keys.Left: 
+                case Keys.Q:
+                    // backward skip in video
                     SetTime(10, TimeChange.Sub);
+                    if (customMediaPlayer.IsPaused)
+                    {
+                        customMediaPlayer.Play(); /// BUG Come back to beginning
+                    }
                     break;
 
                 case Keys.Up:
+                case Keys.Z:
                     customMediaPlayer.Volume += 5;
                     mediaPlayerSlider.Value = customMediaPlayer.Volume;
                     break;
 
                 case Keys.Down:
+                case Keys.S:
                     customMediaPlayer.Volume -= 5;
                     mediaPlayerSlider.Value = customMediaPlayer.Volume;
+                    break;
+
+                case Keys.A:
+                    precedentPictureBox_Click(sender, e);
+                    break;
+
+                case Keys.E:
+                    NextPictureBox_Click(sender, e);
                     break;
 
                 case Keys.NumPad0:
@@ -235,96 +263,11 @@ namespace MediaPlayerWinforms
             {
                 // init media player + progress bar
                 //loadMediaAndPlay("https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4");
-                loadMediaAndPlay("C:\\Users\\tigro\\source\\repos\\MediaPlayerWinforms\\MediaPlayerWinforms\\tmp\\video.mp4");
+                customMediaPlayer.LoadMediaAndPlay("C:\\Users\\tigro\\source\\repos\\MediaPlayerWinforms\\MediaPlayerWinforms\\tmp\\video.mp4");
             }
         }
 
-        private async void loadMediaAndPlay(string url)
-        {
-            Debug.WriteLine("LOAD MEDIA AND PLAY");
-
-            string URL = "";
-            string name = "";
-
-            // Test if it is a good file
-            if (url.StartsWith("http://") || url.StartsWith("https://"))
-            {
-                try
-                {
-                    HttpClient client = new();
-
-                    // Envoyer une requête HEAD pour récupérer uniquement les en-têtes du fichier
-                    using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Head, url);
-                    using HttpResponseMessage response = await client.SendAsync(request);
-
-                    response.EnsureSuccessStatusCode();
-
-                    // Vérifier le type MIME pour s'assurer que c'est une vidéo
-                    string contentType = response.Content.Headers.ContentType.MediaType.ToLowerInvariant();
-                    if (contentType.StartsWith("video/"))
-                    {
-                        URL = url;
-                        Uri uri = new Uri(url);
-                        name = Path.GetFileName(uri.LocalPath);
-                    }
-                }
-                catch (WebException)
-                {
-                    throw new Exception("Erreur lors de la requête (par exemple, le fichier n'existe pas)");
-                }
-                if (URL == "")
-                    throw new Exception("Le fichier en ligne n'existe pas ou n'est pas une vidéo");
-            }
-            else
-            {
-                if (File.Exists(url))
-                {
-                    string[] videoExtensions = { ".mp4", ".avi", ".mov", ".mkv", ".wmv", ".webm" };
-                    string fileExtension = Path.GetExtension(url).ToLower();
-
-                    if (videoExtensions.Contains(fileExtension))
-                    {
-                        URL = url;
-                        name = Path.GetFileName(url);
-                    }
-                }
-                if (URL == "")
-                    throw new Exception("Le fichier local n'existe pas ou n'est pas une vidéo");
-            }
-
-
-            /// Create next to assert if Play() bug or url is incorrect because of the compression
-            customMediaPlayer.Play(uri: new Uri(URL));
-            Debug.WriteLine("CELA PASSE !");
-
-            localDatabase.AddToHistoric(name, URL);
-
-            //time to load media
-            await Task.Delay(1000);
-
-            double duration = 0;
-            int nTry = 100;
-            while (duration == 0 && nTry > 0)
-            {
-                await Task.Delay(10);
-                duration = customMediaPlayer.Duration;
-                nTry--;
-            }
-            if (duration == 0)
-                throw new Exception("Duration 0 !");
-            labelTotalMediaTime.Text = $"{TimeSpan.FromSeconds(duration):hh\\:mm\\:ss}";
-
-            // init progress bar
-            totalSeconds = (int)duration;
-            mediaCustomProgressBar.Maximum = totalSeconds;
-            mediaCustomProgressBar.Minimum = 0;
-            mediaCustomProgressBar.Value = 0;
-            mediaCustomProgressBar.Step = 1;
-
-            customMediaPlayer.Video.IsKeyInputEnabled = true;
-            //customMediaPlayer.Video.IsMouseInputEnabled = false;
-
-        }
+        
 
         private void updateMediaTime_Tick(object sender, EventArgs e)
         {
@@ -351,10 +294,10 @@ namespace MediaPlayerWinforms
 
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    //Get the _path of specified file
+                    //Get the _videoPath of specified file
                     filePath = openFileDialog.FileName;
 
-                    loadMediaAndPlay(filePath);
+                    customMediaPlayer.LoadMediaAndPlay(filePath);
                 }
             }
         }
@@ -371,7 +314,7 @@ namespace MediaPlayerWinforms
                 {
                     // Iterate through the selected files
                     string[] filePaths = openFileDialog.FileNames;
-                    loadMediaAndPlay(filePaths[0]);
+                    customMediaPlayer.LoadMediaAndPlay(filePaths[0]);
                     customQueuePanel.Add(filePaths[0]);
                     for (int i = 1; i < filePaths.Length; i++)
                     {
@@ -392,10 +335,12 @@ namespace MediaPlayerWinforms
         {
             if (customQueuePanel.Visible)
             {
+                Debug.WriteLine("customQueuePanel HIDE");
                 customQueuePanel.Hide();
             }
             else
             {
+                Debug.WriteLine("customQueuePanel SHOW");
                 customQueuePanel.Show();
             }
 
@@ -431,7 +376,7 @@ namespace MediaPlayerWinforms
                     var clickedItem = (ToolStripMenuItem)s;
                     (string name, string path, DateTime lastModified) historicEntry = (ValueTuple<string, string, DateTime>)clickedItem.Tag;
 
-                    loadMediaAndPlay(historicEntry.path);
+                    customMediaPlayer.LoadMediaAndPlay(historicEntry.path);
                 };
 
                 historiqueToolStripMenuItem.DropDownItems.Add(menuItem);
@@ -457,7 +402,7 @@ namespace MediaPlayerWinforms
             if (path != null)
             {
                 customQueuePanel.Next();
-                loadMediaAndPlay(path);
+                customMediaPlayer.LoadMediaAndPlay(path);
             }
         }
 
@@ -472,7 +417,7 @@ namespace MediaPlayerWinforms
             if (path != null)
             {
                 customQueuePanel.Precedent(path);
-                loadMediaAndPlay(path);
+                customMediaPlayer.LoadMediaAndPlay(path);
             }
         }
 
@@ -483,7 +428,7 @@ namespace MediaPlayerWinforms
             if (path != null)
             {
                 customQueuePanel.Next();
-                loadMediaAndPlay(path);
+                customMediaPlayer.LoadMediaAndPlay(path);
             }
         }
     }

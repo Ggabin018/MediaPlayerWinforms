@@ -42,38 +42,38 @@ namespace MediaPlayerWinforms
             {
                 connection.Open();
 
-                // Compress name and _path
+                // Compress name and _videoPath
                 byte[] compressedName = Utility.Compress(name);
                 byte[] compressedPath = Utility.Compress(path);
 
                 // Check if the entry already exists
-                string checkQuery = "SELECT COUNT(*) FROM History WHERE Name = @name AND Path = @_path;";
+                string checkQuery = "SELECT COUNT(*) FROM History WHERE Name = @name AND Path = @_videoPath;";
 
                 using (SQLiteCommand checkCommand = new(checkQuery, connection))
                 {
                     checkCommand.Parameters.AddWithValue("@name", compressedName);
-                    checkCommand.Parameters.AddWithValue("@_path", compressedPath);
+                    checkCommand.Parameters.AddWithValue("@_videoPath", compressedPath);
                     long count = (long)checkCommand.ExecuteScalar();
 
                     if (count == 0)
                     {
-                        string insertDataQuery = $"INSERT INTO History (Name, Path, LastModified) VALUES (@name, @_path, CURRENT_TIMESTAMP);";
+                        string insertDataQuery = $"INSERT INTO History (Name, Path, LastModified) VALUES (@name, @_videoPath, CURRENT_TIMESTAMP);";
 
                         using (SQLiteCommand insertCommand = new(insertDataQuery, connection))
                         {
                             insertCommand.Parameters.AddWithValue("@name", compressedName);
-                            insertCommand.Parameters.AddWithValue("@_path", compressedPath);
+                            insertCommand.Parameters.AddWithValue("@_videoPath", compressedPath);
                             insertCommand.ExecuteNonQuery();
                         }
                     }
                     else
                     {
-                        string updateDataQuery = $"UPDATE History SET LastModified = CURRENT_TIMESTAMP WHERE Name = @name AND Path = @_path;";
+                        string updateDataQuery = $"UPDATE History SET LastModified = CURRENT_TIMESTAMP WHERE Name = @name AND Path = @_videoPath;";
 
                         using (SQLiteCommand updateCommand = new(updateDataQuery, connection))
                         {
                             updateCommand.Parameters.AddWithValue("@name", compressedName);
-                            updateCommand.Parameters.AddWithValue("@_path", compressedPath);
+                            updateCommand.Parameters.AddWithValue("@_videoPath", compressedPath);
                             updateCommand.ExecuteNonQuery();
                         }
                     }

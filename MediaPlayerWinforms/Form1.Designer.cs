@@ -372,6 +372,8 @@ namespace MediaPlayerWinforms
             // 
             customMediaPlayer.BackColor = Color.Black;
             customMediaPlayer.Dock = DockStyle.Fill;
+            customMediaPlayer.ImeMode = ImeMode.NoControl;
+            customMediaPlayer.LabelTotalMediaTime = labelTotalMediaTime;
             customMediaPlayer.Location = new Point(0, 24);
             customMediaPlayer.Name = "customMediaPlayer";
             customMediaPlayer.PositionSeconds = 0D;
@@ -409,7 +411,6 @@ namespace MediaPlayerWinforms
             MainMenuStrip = menuStrip;
             Name = "MainForm";
             Text = "MediaPlayer";
-            Load += MainForm_Load;
             KeyDown += MainForm_KeyDown;
             ((System.ComponentModel.ISupportInitialize)playPictureBox).EndInit();
             menuStrip.ResumeLayout(false);

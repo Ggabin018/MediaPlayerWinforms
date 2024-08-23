@@ -312,5 +312,14 @@ namespace MediaPlayerWinforms.CustomControls
                    clientPos.X >= 0 && clientPos.X < Width;
         }
 
+
+        public void InitProgressBar(int duration)
+        {
+            int totalseconds = (int)duration;
+            Maximum = totalseconds;
+            Minimum = 0;
+            Value = 0;
+            Step = 1;
+        }
     }
 }

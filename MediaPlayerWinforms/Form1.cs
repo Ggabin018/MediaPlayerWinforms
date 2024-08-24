@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Net;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
@@ -17,6 +17,10 @@ namespace MediaPlayerWinforms
         // attributes
         Point precedentMousePosition = new(0, 0);
         bool isFullScreen = false;
+
+        bool isMuted = false;
+        int volumeValueBeforeMute = 100;
+
         int totalSeconds = 0;
         LocalDatabase localDatabase = new();
 
@@ -147,7 +151,6 @@ namespace MediaPlayerWinforms
 
         private void SetVolume(int value, ValueChange status)
         {
-            // Bugfix audio go directly to 0
             mutexSetVolume.WaitOne();
 
             try
@@ -355,6 +358,42 @@ namespace MediaPlayerWinforms
             }
         }
 
+        private void ouvrirUnDossierToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            using (FolderBrowserDialog fbd = new FolderBrowserDialog())
+            {
+                if (fbd.ShowDialog() == DialogResult.OK)
+                {
+                    try
+                    {
+                        string dbPath = fbd.SelectedPath;
+
+                        var extensions = new[] { ".mp4", ".avi", ".mov", ".mkv", ".wmv", ".webm" };
+                        List<string> filePaths = Directory.EnumerateFiles(dbPath, "*", SearchOption.TopDirectoryOnly)
+                              .Where(file => extensions.Any(ext => file.EndsWith(ext, StringComparison.OrdinalIgnoreCase)))
+                              .ToList();
+
+                        customMediaPlayer.LoadMediaAndPlay(filePaths[0]);
+                        customQueuePanel.Add(filePaths[0]);
+                        for (int i = 1; i < filePaths.Count; i++)
+                        {
+                            customMediaPlayer.AddToQueue(filePaths[i]);
+                            customQueuePanel.Add(filePaths[i]);
+                        }
+                    }
+                    catch (UnauthorizedAccessException uAEx)
+                    {
+                        Console.WriteLine(uAEx.Message);
+                    }
+                    catch (PathTooLongException pathEx)
+                    {
+                        Console.WriteLine(pathEx.Message);
+                    }
+                }
+
+            }
+        }
+
 
         private void stopPictureBox_Click(object sender, EventArgs e)
         {
@@ -492,6 +531,44 @@ namespace MediaPlayerWinforms
         private void rewindPictureBox_Click(object sender, EventArgs e)
         {
             SetTime(int.Parse($"{rewindPictureBox.Tag}"), ValueChange.Sub);
+        }
+
+        private void fullScrenPictureBox_Click(object sender, EventArgs e)
+        {
+            ModifyFullScreen(null);
+        }
+
+        private void pleinÉcranToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            ModifyFullScreen(null);
+        }
+
+        private void couperLeSonToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            isMuted = true;
+            SetVolume(0, ValueChange.Set);
+            volumePictureBox.BackgroundImage = Properties.Resources.mute_50;
+        }
+
+        private void volumePictureBox_Click(object sender, EventArgs e)
+        {
+            if (isMuted)
+            {
+                isMuted = false;
+                SetVolume(volumeValueBeforeMute, ValueChange.Set);
+                volumePictureBox.BackgroundImage = Properties.Resources.high_volume_50;
+            }
+            else
+            {
+                isMuted = true;
+                SetVolume(0, ValueChange.Set);
+                volumePictureBox.BackgroundImage = Properties.Resources.mute_50;
+            }
+        }
+
+        private void favPictureBox_Click(object sender, EventArgs e)
+        {
+            favPictureBox.BackgroundImage= Properties.Resources.fav_50;
         }
     }
 }

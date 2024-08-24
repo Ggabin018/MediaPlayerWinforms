@@ -1,11 +1,14 @@
-﻿using System.ComponentModel;
+﻿using System;
+using System.ComponentModel;
 using System.Configuration;
 using System.Diagnostics;
 using System.Net;
 using System.Security.Policy;
 using Vlc.DotNet.Core;
 using Vlc.DotNet.Core.Interops.Signatures;
+using Vlc.DotNet.Forms;
 using static MediaToolkit.Model.Metadata;
+using static System.Windows.Forms.Design.AxImporter;
 
 namespace MediaPlayerWinforms.CustomControls
 {
@@ -143,21 +146,12 @@ namespace MediaPlayerWinforms.CustomControls
             {
                 try
                 {
-                    HttpClient client = new();
+                    var videoStreamUrl = await VideoUrlChecker.GetVideoStreamUrlAsync(url);
 
-                    // Envoyer une requête HEAD pour récupérer uniquement les en-têtes du fichier
-                    using HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Head, url);
-                    using HttpResponseMessage response = await client.SendAsync(request);
-
-                    response.EnsureSuccessStatusCode();
-
-                    // Vérifier le type MIME pour s'assurer que c'est une vidéo
-                    string contentType = response.Content.Headers.ContentType.MediaType.ToLowerInvariant();
-                    if (contentType.StartsWith("video/"))
+                    if (videoStreamUrl != null)
                     {
                         URL = url;
-                        Uri uri = new Uri(url);
-                        name = Path.GetFileName(uri.LocalPath);
+                        name = Path.GetFileName(new Uri(url).LocalPath);
                     }
                 }
                 catch (WebException)
@@ -184,8 +178,6 @@ namespace MediaPlayerWinforms.CustomControls
                     throw new Exception("Le fichier local n'existe pas ou n'est pas une vidéo");
             }
 
-
-            /// Create next to assert if Play() bug or url is incorrect because of the compression
             Play(uri: new Uri(URL));
 
             if (currentVideoPath != "")

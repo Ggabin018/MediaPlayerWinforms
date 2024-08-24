@@ -4,6 +4,8 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using YoutubeExplode;
+using YoutubeExplode.Videos.Streams;
 
 namespace MediaPlayerWinforms
 {

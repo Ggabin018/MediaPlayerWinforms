@@ -118,11 +118,35 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="fav_50" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\fav-50.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="forward_10_50" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\forward-10-50.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="forward_5_50" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\forward-5-50.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="high_volume_50" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\high-volume-50.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="list-50px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\icon\list-50.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="low_volume_50" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\low-volume-50.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="medium_volume_50" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\medium-volume-50.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="mute_50" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\mute-50.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="next_50" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\icon\next-50.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="not_fav_50" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\not-fav-50.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="pause-50px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\icon\pause-50px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -133,10 +157,13 @@
   <data name="precedent_50" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\icon\precedent-50.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="replay_10_50" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\replay-10-50.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="replay_5_50" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>..\icon\replay-5-50.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="stop-50px" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>..\icon\stop-50px.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
-  </data>
-  <data name="test" type="System.Resources.ResXFileRef, System.Windows.Forms">
-    <value>..\img\test.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
 </root>

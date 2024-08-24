@@ -6,8 +6,7 @@ namespace MediaPlayerWinforms.CustomControls
 {
     class CustomSlider : Control
     {
-        // DEBUG
-        Label labelDebug;
+        Label labelVolume;
 
         // Draw Properties
         private readonly LinearGradientBrush linGrBrush = new LinearGradientBrush(
@@ -18,44 +17,55 @@ namespace MediaPlayerWinforms.CustomControls
         private Color sliderColor = Color.Black;
 
         // Others
-        private int value = 100;
+        private int _value = 100;
         private int maximum = 125;
         System.Windows.Forms.Timer hoverCall;
 
         public event Action<int> OnMouseDownForMediaPlayer;
 
-        public int Value { get => value; set => this.value = value; }
+        public int Value 
+        { get => _value; set
+            {
+                if (value < 0)
+                    _value = 0;
+                else if (value > maximum)
+                    _value = maximum;
+                else
+                    _value = value;
+
+                labelVolume.Text = _value.ToString()+"%";
+                Invalidate();
+            } 
+        }
         public int Maximum { get => maximum; set => maximum = value; }
 
         [Category("Custom Controls")]
-        public Label LabelDebug { get => labelDebug; set => labelDebug = value; }
+        public Label LabelVolume { get => labelVolume; set => labelVolume = value; }
+
+
 
         /// <summary>
-        /// Draw the triangle in background representing the volume max
+        /// Draw the background rectangle representing the maximum volume level
         /// </summary>
         /// <param name="e"></param>
-        private void FillBackTriangle(PaintEventArgs e)
+        private void FillBackRectangle(PaintEventArgs e)
         {
-            e.Graphics.FillPolygon(Brushes.White, new Point[] {
-                new(0,Height),
-                new(Width, Height),
-                new(Width, 0) });
+            var rect = new Rectangle(0, Height / 2, Width, Height / 2);
+            e.Graphics.FillRectangle(Brushes.White, rect);
         }
 
         /// <summary>
-        /// Draw the triangle representing the current volume
+        /// Draw the rectangle representing the current volume
         /// </summary>
         /// <param name="e"></param>
-        /// <param name="val"> value of the current volume</param>
-        /// <exception cref="ArgumentException"> value greater than volume max</exception>
-        private void FillForeTriangle(PaintEventArgs e, int val)
+        /// <param name="val">Value of the current volume</param>
+        private void FillForeRectangle(PaintEventArgs e, int val)
         {
             if (val > Maximum)
                 throw new ArgumentException("val > Width");
-            e.Graphics.FillPolygon(linGrBrush, new Point[] {
-                new(0,Height),
-                new(val, Height - Height*val/Width), // max != width possible...
-                new(val, Height) });
+
+            var rect = new Rectangle(0, Height / 2, val, Height / 2);
+            e.Graphics.FillRectangle(linGrBrush, rect);
         }
 
         public CustomSlider()
@@ -74,8 +84,8 @@ namespace MediaPlayerWinforms.CustomControls
         {
             base.OnPaint(e);
 
-            FillBackTriangle(e);
-            FillForeTriangle(e, Value);
+            FillBackRectangle(e);
+            FillForeRectangle(e, Value);
 
             if (IsHover())
                 DrawValueText(e.Graphics);
@@ -83,18 +93,21 @@ namespace MediaPlayerWinforms.CustomControls
             
         }
 
+
         /// <summary>
-        /// Paint value text
+        /// Paint value text above the rectangle
         /// </summary>
         /// <param name="graph"></param>
-        /// <param name="sliderWidth"></param>
         private void DrawValueText(Graphics graph)
         {
             Point clientPos = PointToClient(MousePosition);
             int valueToDraw = clientPos.X * Maximum / Width;
             string text = valueToDraw.ToString() + "%";
             var textSize = TextRenderer.MeasureText(text, Font);
-            var rectText = new Rectangle(clientPos.X - textSize.Width / 2, clientPos.Y - textSize.Height / 2, textSize.Width, textSize.Height + 2);
+
+            var rectText = new Rectangle(clientPos.X - textSize.Width / 2,
+                                         Height / 2 - textSize.Height - 5, // Adjust position above the rectangle
+                                         textSize.Width, textSize.Height + 2);
 
             using var brushText = new SolidBrush(ForeColor);
             using var brushTextBack = new SolidBrush(Color.Black);
@@ -125,8 +138,6 @@ namespace MediaPlayerWinforms.CustomControls
             Point clientPos = PointToClient(MousePosition);
             int newVolume = clientPos.X * Maximum / Width;
             Value = newVolume;
-
-            labelDebug.Text = newVolume.ToString();
 
             OnMouseDownForMediaPlayer.Invoke(newVolume);
         }

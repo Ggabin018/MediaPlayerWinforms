@@ -206,7 +206,7 @@ namespace MediaPlayerWinforms.CustomControls
             }
         }
 
-        // Paint value text
+        // Paint _value text
         private void DrawValueText(Graphics graph, int sliderWidth, Rectangle rectSlider)
         {
             string text = symbolBefore + Value.ToString() + symbolAfter;

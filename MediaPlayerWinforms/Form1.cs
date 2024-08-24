@@ -1,9 +1,12 @@
 using System.Diagnostics;
 using System.Net;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Windows.Forms;
 
 namespace MediaPlayerWinforms
 {
-    public enum TimeChange
+    public enum ValueChange
     {
         Add,
         Sub,
@@ -18,6 +21,7 @@ namespace MediaPlayerWinforms
         LocalDatabase localDatabase = new();
 
         private static readonly Mutex mutexSetTime = new Mutex();
+        private static readonly Mutex mutexSetVolume = new();
 
 
         public MainForm()
@@ -96,7 +100,7 @@ namespace MediaPlayerWinforms
 
         }
 
-        private void SetTime(int time, TimeChange status)
+        private void SetTime(int time, ValueChange status)
         {
             mutexSetTime.WaitOne();
 
@@ -104,7 +108,7 @@ namespace MediaPlayerWinforms
             {
                 switch (status)
                 {
-                    case TimeChange.Add:
+                    case ValueChange.Add:
                         if (customMediaPlayer.PositionSeconds + time < customMediaPlayer.Duration)
                         {
                             customMediaPlayer.PositionSeconds += time;
@@ -116,7 +120,7 @@ namespace MediaPlayerWinforms
                             mediaCustomProgressBar.Value = (int)customMediaPlayer.Duration;
                         }
                         break;
-                    case TimeChange.Sub:
+                    case ValueChange.Sub:
                         if (customMediaPlayer.PositionSeconds - time >= 0)
                         {
                             customMediaPlayer.PositionSeconds -= time;
@@ -128,7 +132,7 @@ namespace MediaPlayerWinforms
                             mediaCustomProgressBar.Value = 0;
                         }
                         break;
-                    case TimeChange.Set:
+                    case ValueChange.Set:
                         if (time < customMediaPlayer.Duration)
                         {
                             customMediaPlayer.PositionSeconds = time;
@@ -138,9 +142,37 @@ namespace MediaPlayerWinforms
                 }
             }
             finally { mutexSetTime.ReleaseMutex(); }
-            
+
         }
 
+        private void SetVolume(int value, ValueChange status)
+        {
+            // Bugfix audio go directly to 0
+            mutexSetVolume.WaitOne();
+
+            try
+            {
+                customMediaPlayer.Volume += value;
+                mediaPlayerSlider.Value = customMediaPlayer.Volume;
+
+                switch (status)
+                {
+                    case ValueChange.Add:
+                        customMediaPlayer.Volume += value;
+                        mediaPlayerSlider.Value = customMediaPlayer.Volume;
+                        break;
+                    case ValueChange.Sub:
+                        customMediaPlayer.Volume -= value;
+                        mediaPlayerSlider.Value = customMediaPlayer.Volume;
+                        break;
+                    case ValueChange.Set:
+                        customMediaPlayer.Volume = value;
+                        mediaPlayerSlider.Value = customMediaPlayer.Volume;
+                        break;
+                }
+            }
+            finally { mutexSetVolume.ReleaseMutex(); }
+        }
         private void MainForm_KeyDown(object sender, KeyEventArgs e)
         {
             switch (e.KeyCode)
@@ -153,21 +185,21 @@ namespace MediaPlayerWinforms
                     playPictureBox_Click(sender, e);
                     break;
 
-                case Keys.F11: 
+                case Keys.F11:
                 case Keys.F:
                     ModifyFullScreen(null);
                     break;
 
-                case Keys.Right: 
+                case Keys.Right:
                 case Keys.D:
                     // forward skip in video
-                    SetTime(10, TimeChange.Add);
+                    SetTime(10, ValueChange.Add);
                     break;
 
-                case Keys.Left: 
+                case Keys.Left:
                 case Keys.Q:
                     // backward skip in video
-                    SetTime(10, TimeChange.Sub);
+                    SetTime(10, ValueChange.Sub);
                     if (customMediaPlayer.IsPaused)
                     {
                         customMediaPlayer.Play(); /// BUG Come back to beginning
@@ -176,14 +208,12 @@ namespace MediaPlayerWinforms
 
                 case Keys.Up:
                 case Keys.Z:
-                    customMediaPlayer.Volume += 5;
-                    mediaPlayerSlider.Value = customMediaPlayer.Volume;
+                    SetVolume(5, ValueChange.Add);
                     break;
 
                 case Keys.Down:
                 case Keys.S:
-                    customMediaPlayer.Volume -= 5;
-                    mediaPlayerSlider.Value = customMediaPlayer.Volume;
+                    SetVolume(5, ValueChange.Sub);
                     break;
 
                 case Keys.A:
@@ -196,52 +226,52 @@ namespace MediaPlayerWinforms
 
                 case Keys.NumPad0:
                 case Keys.D0:
-                    SetTime(0, TimeChange.Set);
+                    SetTime(0, ValueChange.Set);
                     break;
 
                 case Keys.NumPad1:
                 case Keys.D1:
-                    SetTime((int)(customMediaPlayer.Duration * 0.1), TimeChange.Set);
+                    SetTime((int)(customMediaPlayer.Duration * 0.1), ValueChange.Set);
                     break;
 
                 case Keys.NumPad2:
                 case Keys.D2:
-                    SetTime((int)(customMediaPlayer.Duration * 0.2), TimeChange.Set);
+                    SetTime((int)(customMediaPlayer.Duration * 0.2), ValueChange.Set);
                     break;
 
                 case Keys.NumPad3:
                 case Keys.D3:
-                    SetTime((int)(customMediaPlayer.Duration * 0.3), TimeChange.Set);
+                    SetTime((int)(customMediaPlayer.Duration * 0.3), ValueChange.Set);
                     break;
 
                 case Keys.NumPad4:
                 case Keys.D4:
-                    SetTime((int)(customMediaPlayer.Duration * 0.4), TimeChange.Set);
+                    SetTime((int)(customMediaPlayer.Duration * 0.4), ValueChange.Set);
                     break;
 
                 case Keys.NumPad5:
                 case Keys.D5:
-                    SetTime((int)(customMediaPlayer.Duration * 0.5), TimeChange.Set);
+                    SetTime((int)(customMediaPlayer.Duration * 0.5), ValueChange.Set);
                     break;
 
                 case Keys.NumPad6:
                 case Keys.D6:
-                    SetTime((int)(customMediaPlayer.Duration * 0.6), TimeChange.Set);
+                    SetTime((int)(customMediaPlayer.Duration * 0.6), ValueChange.Set);
                     break;
 
                 case Keys.NumPad7:
                 case Keys.D7:
-                    SetTime((int)(customMediaPlayer.Duration * 0.7), TimeChange.Set);
+                    SetTime((int)(customMediaPlayer.Duration * 0.7), ValueChange.Set);
                     break;
 
                 case Keys.NumPad8:
                 case Keys.D8:
-                    SetTime((int)(customMediaPlayer.Duration * 0.8), TimeChange.Set);
+                    SetTime((int)(customMediaPlayer.Duration * 0.8), ValueChange.Set);
                     break;
 
                 case Keys.NumPad9:
                 case Keys.D9:
-                    SetTime((int)(customMediaPlayer.Duration * 0.9), TimeChange.Set);
+                    SetTime((int)(customMediaPlayer.Duration * 0.9), ValueChange.Set);
                     break;
             }
 
@@ -262,12 +292,12 @@ namespace MediaPlayerWinforms
             else
             {
                 // init media player + progress bar
-                //loadMediaAndPlay("https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4");
-                customMediaPlayer.LoadMediaAndPlay("C:\\Users\\tigro\\source\\repos\\MediaPlayerWinforms\\MediaPlayerWinforms\\tmp\\video.mp4");
+                customMediaPlayer.LoadMediaAndPlay("https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4");
+                //customMediaPlayer.LoadMediaAndPlay("C:\\Users\\tigro\\source\\repos\\MediaPlayerWinforms\\MediaPlayerWinforms\\tmp\\video.mp4");
             }
         }
 
-        
+
 
         private void updateMediaTime_Tick(object sender, EventArgs e)
         {
@@ -397,7 +427,7 @@ namespace MediaPlayerWinforms
         {
             Debug.WriteLine("END REACH");
 
-            string? path = customMediaPlayer.Next();
+            string? path = customMediaPlayer.Next(false);
 
             if (path != null)
             {
@@ -408,7 +438,11 @@ namespace MediaPlayerWinforms
 
         private void flushHistoryToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            localDatabase.ClearHistory();
+            DialogResult dialogResult = MessageBox.Show("Delete History ?", "Confirmation Window", MessageBoxButtons.YesNo);
+            if (dialogResult == DialogResult.Yes)
+            {
+                localDatabase.ClearHistory();
+            }
         }
 
         private void precedentPictureBox_Click(object sender, EventArgs e)
@@ -423,7 +457,7 @@ namespace MediaPlayerWinforms
 
         private void NextPictureBox_Click(object sender, EventArgs e)
         {
-            string? path = customMediaPlayer.Next();
+            string? path = customMediaPlayer.Next(true);
 
             if (path != null)
             {

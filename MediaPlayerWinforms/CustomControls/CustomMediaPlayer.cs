@@ -9,20 +9,39 @@ using static MediaToolkit.Model.Metadata;
 
 namespace MediaPlayerWinforms.CustomControls
 {
+    public enum LoopType
+    {
+        NoLoop,
+        Loop1time,
+        LoopNtimes,
+        LoopAll,
+        InfiniteLoop
+    }
     class CustomMediaPlayer : Vlc.DotNet.Forms.VlcControl
     {
         List<string> _listNextVideos = new List<string>();
         Stack<string> _stackPrecedentVideos = new Stack<string>();
         string currentVideoPath = "";
-
+        
         public event Action<string, string> LocalDatabaseAddToHistoric;
         public event Action<int> InitProgressBar;
         public event Action<string> GoToThisVideoInQueuePanel;
+
+        LoopType _loopVar; // type of loop
+        int _loopN = 0; // number of loop if LoopNtimes
+        int _loopCount = 0; // number of loop to reach in current context
+        int _loopCounter = 0; // current number of loop
 
         private Label labelTotalMediaTime;
 
         [Category("Custom Controls")]
         public Label LabelTotalMediaTime { get => labelTotalMediaTime; set => labelTotalMediaTime = value; }
+
+        [Category("Custom Controls")]
+        public LoopType LoopVar { get => _loopVar; set => _loopVar = value; }
+
+        [Category("Custom Controls")]
+        public int LoopN { get => _loopN; set => _loopN = value; }
 
         public CustomMediaPlayer() : base()
         {
@@ -58,21 +77,48 @@ namespace MediaPlayerWinforms.CustomControls
             get => Audio.Volume; set => Audio.Volume = value;
         }
         public bool IsPaused { get => State == MediaStates.Paused;}
-        
-
         public void AddToQueue(string path)
         {
             _listNextVideos.Add(path);
         }
 
-        public string? Next()
+        public string? Next(bool forceFlag)
         {
-            if (_listNextVideos.Count == 0)
+            if (_listNextVideos.Count == 0) /// NEED MODIF WITH LOOP ALL
                 return null;
-            string path = _listNextVideos[0];
-            _listNextVideos.RemoveAt(0);
-            _stackPrecedentVideos.Push(path);
-            return path;
+
+            switch (LoopVar)
+            {
+                case LoopType.NoLoop:
+                    _loopCount = 0;
+                    forceFlag = true;
+                    break;
+                case LoopType.LoopAll:
+                    throw new NotImplementedException();
+                case LoopType.Loop1time:
+                    _loopCount = 1;
+                    break;
+                case LoopType.LoopNtimes:
+                    _loopCount = LoopN;
+                    break;
+                case LoopType.InfiniteLoop:
+                    Play(currentVideoPath);
+                    // bug, not playing
+                    return null;
+            }
+
+            _loopCounter++;
+
+            if (forceFlag || _loopCounter > _loopCount)
+            {
+                string path = _listNextVideos[0];
+                _listNextVideos.RemoveAt(0);
+                _stackPrecedentVideos.Push(path);
+
+                _loopCounter = 0;
+                return path;
+            }
+            return null;
         }
 
         public string? Precedent()

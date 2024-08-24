@@ -193,13 +193,13 @@ namespace MediaPlayerWinforms
                 case Keys.Right:
                 case Keys.D:
                     // forward skip in video
-                    SetTime(10, ValueChange.Add);
+                    SetTime(int.Parse($"{forwardPictureBox.Tag}"), ValueChange.Add);
                     break;
 
                 case Keys.Left:
                 case Keys.Q:
                     // backward skip in video
-                    SetTime(10, ValueChange.Sub);
+                    SetTime(int.Parse($"{rewindPictureBox.Tag}"), ValueChange.Sub);
                     if (customMediaPlayer.IsPaused)
                     {
                         customMediaPlayer.Play(); /// BUG Come back to beginning
@@ -464,6 +464,34 @@ namespace MediaPlayerWinforms
                 customQueuePanel.Next();
                 customMediaPlayer.LoadMediaAndPlay(path);
             }
+        }
+
+        private void fiveSecondesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            forwardPictureBox.BackgroundImage = Properties.Resources.forward_5_50;
+            forwardPictureBox.Tag = 5;
+
+            rewindPictureBox.BackgroundImage = Properties.Resources.replay_5_50;
+            rewindPictureBox.Tag = 5;
+        }
+
+        private void tenSecondesToolStripMenuItem1_Click(object sender, EventArgs e)
+        {
+            forwardPictureBox.BackgroundImage = Properties.Resources.forward_10_50;
+            forwardPictureBox.Tag = 10;
+
+            rewindPictureBox.BackgroundImage = Properties.Resources.replay_10_50;
+            rewindPictureBox.Tag = 10;
+        }
+
+        private void forwardPictureBox_Click(object sender, EventArgs e)
+        {
+            SetTime(int.Parse($"{forwardPictureBox.Tag}"), ValueChange.Add);
+        }
+
+        private void rewindPictureBox_Click(object sender, EventArgs e)
+        {
+            SetTime(int.Parse($"{rewindPictureBox.Tag}"), ValueChange.Sub);
         }
     }
 }

@@ -192,7 +192,7 @@ namespace MediaPlayerWinforms.CustomControls
                 DrawValueText(graph, sliderWidth, rectSlider);
 
             // painting time near mouse 
-            if (IsHover())
+            if (Utility.ControlIsHover(this))
                 DrawValueTime(graph);
             else
             {
@@ -296,7 +296,7 @@ namespace MediaPlayerWinforms.CustomControls
 
         protected override void OnMouseClick(MouseEventArgs e)
         {
-            if (IsHover())
+            if (Utility.ControlIsHover(this))
             {
                 Point clientPos = PointToClient(MousePosition);
                 int newTime = clientPos.X * Maximum / Width;
@@ -304,14 +304,6 @@ namespace MediaPlayerWinforms.CustomControls
                 OnClickProgressBarForMediaPlayer.Invoke(newTime);
             }
         }
-
-        private bool IsHover()
-        {
-            Point clientPos = PointToClient(MousePosition);
-            return clientPos.Y >= 0 && clientPos.Y < Height &&
-                   clientPos.X >= 0 && clientPos.X < Width;
-        }
-
 
         public void InitProgressBar(int duration)
         {

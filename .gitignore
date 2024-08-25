@@ -362,6 +362,15 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-# Big Video File
-.mp4
-/MediaPlayerWinforms/tmp/video.mp4
+
+# ------------------------------ Additional Part ----------------------------- #
+
+# Video File
+*.mp4
+
+# Python folder
+[Pp]ython/
+
+# tmp folder
+tmp/
+TMP/

@@ -3,6 +3,8 @@ using System.Net;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using System.Windows.Forms;
+using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace MediaPlayerWinforms
 {
@@ -31,6 +33,8 @@ namespace MediaPlayerWinforms
         public MainForm()
         {
             InitializeComponent();
+
+            timerMouseMovement.Start();
 
             // Link event
             mediaCustomProgressBar.OnClickProgressBarForMediaPlayer += customMediaPlayer.OnClickProgressBarForMediaPlayer;
@@ -76,30 +80,6 @@ namespace MediaPlayerWinforms
                     isFullScreen = true;
                     menuStrip.Hide();
                 }
-            }
-
-        }
-
-        private void timerMouvementMouse_Tick(object sender, EventArgs e)
-        {
-            Point curPos = MousePosition;
-
-            Point clientPos = PointToClient(MousePosition);
-            if (clientPos.Y > customMediaPlayer.Location.Y && clientPos.Y < customMediaPlayer.Location.Y + customMediaPlayer.Height &&
-                clientPos.X > customMediaPlayer.Location.X && clientPos.X < customMediaPlayer.Location.X + customMediaPlayer.Width)
-            {
-
-                if (curPos.Equals(precedentMousePosition))
-                {
-                    /// Cursor.Hide();
-                    /// panelMediaControl.Hide();
-                }
-                else
-                {
-                    Cursor.Show();
-                    panelMediaControl.Show();
-                }
-                precedentMousePosition = curPos;
             }
 
         }
@@ -176,111 +156,8 @@ namespace MediaPlayerWinforms
             }
             finally { mutexSetVolume.ReleaseMutex(); }
         }
-        private void MainForm_KeyDown(object sender, KeyEventArgs e)
-        {
-            switch (e.KeyCode)
-            {
-                case Keys.Escape:
-                    ModifyFullScreen(false);
-                    break;
 
-                case Keys.Space:
-                    playPictureBox_Click(sender, e);
-                    break;
-
-                case Keys.F11:
-                case Keys.F:
-                    ModifyFullScreen(null);
-                    break;
-
-                case Keys.Right:
-                case Keys.D:
-                    // forward skip in video
-                    SetTime(int.Parse($"{forwardPictureBox.Tag}"), ValueChange.Add);
-                    break;
-
-                case Keys.Left:
-                case Keys.Q:
-                    // backward skip in video
-                    SetTime(int.Parse($"{rewindPictureBox.Tag}"), ValueChange.Sub);
-                    if (customMediaPlayer.IsPaused)
-                    {
-                        customMediaPlayer.Play(); /// BUG Come back to beginning
-                    }
-                    break;
-
-                case Keys.Up:
-                case Keys.Z:
-                    SetVolume(5, ValueChange.Add);
-                    break;
-
-                case Keys.Down:
-                case Keys.S:
-                    SetVolume(5, ValueChange.Sub);
-                    break;
-
-                case Keys.A:
-                    precedentPictureBox_Click(sender, e);
-                    break;
-
-                case Keys.E:
-                    NextPictureBox_Click(sender, e);
-                    break;
-
-                case Keys.NumPad0:
-                case Keys.D0:
-                    SetTime(0, ValueChange.Set);
-                    break;
-
-                case Keys.NumPad1:
-                case Keys.D1:
-                    SetTime((int)(customMediaPlayer.Duration * 0.1), ValueChange.Set);
-                    break;
-
-                case Keys.NumPad2:
-                case Keys.D2:
-                    SetTime((int)(customMediaPlayer.Duration * 0.2), ValueChange.Set);
-                    break;
-
-                case Keys.NumPad3:
-                case Keys.D3:
-                    SetTime((int)(customMediaPlayer.Duration * 0.3), ValueChange.Set);
-                    break;
-
-                case Keys.NumPad4:
-                case Keys.D4:
-                    SetTime((int)(customMediaPlayer.Duration * 0.4), ValueChange.Set);
-                    break;
-
-                case Keys.NumPad5:
-                case Keys.D5:
-                    SetTime((int)(customMediaPlayer.Duration * 0.5), ValueChange.Set);
-                    break;
-
-                case Keys.NumPad6:
-                case Keys.D6:
-                    SetTime((int)(customMediaPlayer.Duration * 0.6), ValueChange.Set);
-                    break;
-
-                case Keys.NumPad7:
-                case Keys.D7:
-                    SetTime((int)(customMediaPlayer.Duration * 0.7), ValueChange.Set);
-                    break;
-
-                case Keys.NumPad8:
-                case Keys.D8:
-                    SetTime((int)(customMediaPlayer.Duration * 0.8), ValueChange.Set);
-                    break;
-
-                case Keys.NumPad9:
-                case Keys.D9:
-                    SetTime((int)(customMediaPlayer.Duration * 0.9), ValueChange.Set);
-                    break;
-            }
-
-        }
-
-        private void playPictureBox_Click(object sender, EventArgs? e)
+        private void PlayPause()
         {
             if (customMediaPlayer.IsPlaying)
             {
@@ -295,12 +172,15 @@ namespace MediaPlayerWinforms
             else
             {
                 // init media player + progress bar
-                customMediaPlayer.LoadMediaAndPlay("https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4");
-                //customMediaPlayer.LoadMediaAndPlay("C:\\Users\\tigro\\source\\repos\\MediaPlayerWinforms\\MediaPlayerWinforms\\tmp\\video.mp4");
+                //customMediaPlayer.LoadMediaAndPlay("https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4");
+                customMediaPlayer.LoadMediaAndPlay("C:\\Users\\tigro\\source\\repos\\MediaPlayerWinforms\\MediaPlayerWinforms\\tmp\\video_test.mp4");
             }
         }
 
-
+        private void playPictureBox_Click(object sender, EventArgs? e)
+        {
+            PlayPause();
+        }
 
         private void updateMediaTime_Tick(object sender, EventArgs e)
         {
@@ -418,12 +298,7 @@ namespace MediaPlayerWinforms
 
         private void customMediaPlayer_Click(object sender, EventArgs e)
         {
-            playPictureBox_Click(sender, null);
-        }
-
-        private void panelMediaControl_MouseEnter(object sender, EventArgs e)
-        {
-            Cursor.Show();
+            PlayPause();
         }
 
         private void historiqueToolStripMenuItem_MouseHover(object sender, EventArgs e)
@@ -484,7 +359,7 @@ namespace MediaPlayerWinforms
             }
         }
 
-        private void precedentPictureBox_Click(object sender, EventArgs e)
+        private void OnPrecedent()
         {
             string? path = customMediaPlayer.Precedent();
             if (path != null)
@@ -493,8 +368,11 @@ namespace MediaPlayerWinforms
                 customMediaPlayer.LoadMediaAndPlay(path);
             }
         }
-
-        private void NextPictureBox_Click(object sender, EventArgs e)
+        private void precedentPictureBox_Click(object sender, EventArgs e)
+        {
+            OnPrecedent();
+        }
+        private void OnNext()
         {
             string? path = customMediaPlayer.Next(true);
 
@@ -503,6 +381,10 @@ namespace MediaPlayerWinforms
                 customQueuePanel.Next();
                 customMediaPlayer.LoadMediaAndPlay(path);
             }
+        }
+        private void NextPictureBox_Click(object sender, EventArgs e)
+        {
+            OnNext();
         }
 
         private void fiveSecondesToolStripMenuItem_Click(object sender, EventArgs e)
@@ -568,7 +450,163 @@ namespace MediaPlayerWinforms
 
         private void favPictureBox_Click(object sender, EventArgs e)
         {
-            favPictureBox.BackgroundImage= Properties.Resources.fav_50;
+            favPictureBox.BackgroundImage = Properties.Resources.fav_50;
+        }
+
+
+        // Override the WndProc method to detect mouse movement at the form level
+        protected override void WndProc(ref Message m)
+        {
+            base.WndProc(ref m);
+
+            const int WM_MOUSEMOVE = 0x0200;
+
+            if (m.Msg == WM_MOUSEMOVE)
+            {
+                OnActivity();
+            }
+        }
+
+        private void OnActivity()
+        {
+            timerMouseMovement.Stop();
+            timerMouseMovement.Start();
+            Cursor.Show();
+            panelMediaControl.Show();
+        }
+
+        // Override ProcessCmdKey to capture arrow key presses
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            OnActivity();
+
+            switch (keyData)
+            {
+                case Keys.Space:
+                    PlayPause();
+                    break;
+
+                case Keys.Escape:
+                    ModifyFullScreen(false);
+                    break;
+
+                case Keys.F11:
+                case Keys.F:
+                    ModifyFullScreen(null);
+                    break;
+
+                case Keys.Right:
+                case Keys.D:
+                    // forward skip in video
+                    SetTime(int.Parse($"{forwardPictureBox.Tag}"), ValueChange.Add);
+                    break;
+
+                case Keys.Left:
+                case Keys.Q:
+                    // backward skip in video
+                    SetTime(int.Parse($"{rewindPictureBox.Tag}"), ValueChange.Sub);
+                    if (customMediaPlayer.IsPaused)
+                    {
+                        customMediaPlayer.Play(); /// BUG Come back to beginning
+                    }
+                    break;
+
+                case Keys.Up:
+                case Keys.Z:
+                    SetVolume(5, ValueChange.Add);
+                    break;
+
+                case Keys.Down:
+                case Keys.S:
+                    SetVolume(5, ValueChange.Sub);
+                    break;
+
+                case Keys.A:
+                    OnPrecedent();
+                    break;
+
+                case Keys.E:
+                    OnNext();
+                    break;
+
+                case Keys.NumPad0:
+                case Keys.D0:
+                    SetTime(0, ValueChange.Set);
+                    break;
+
+                case Keys.NumPad1:
+                case Keys.D1:
+                    SetTime((int)(customMediaPlayer.Duration * 0.1), ValueChange.Set);
+                    break;
+
+                case Keys.NumPad2:
+                case Keys.D2:
+                    SetTime((int)(customMediaPlayer.Duration * 0.2), ValueChange.Set);
+                    break;
+
+                case Keys.NumPad3:
+                case Keys.D3:
+                    SetTime((int)(customMediaPlayer.Duration * 0.3), ValueChange.Set);
+                    break;
+
+                case Keys.NumPad4:
+                case Keys.D4:
+                    SetTime((int)(customMediaPlayer.Duration * 0.4), ValueChange.Set);
+                    break;
+
+                case Keys.NumPad5:
+                case Keys.D5:
+                    SetTime((int)(customMediaPlayer.Duration * 0.5), ValueChange.Set);
+                    break;
+
+                case Keys.NumPad6:
+                case Keys.D6:
+                    SetTime((int)(customMediaPlayer.Duration * 0.6), ValueChange.Set);
+                    break;
+
+                case Keys.NumPad7:
+                case Keys.D7:
+                    SetTime((int)(customMediaPlayer.Duration * 0.7), ValueChange.Set);
+                    break;
+
+                case Keys.NumPad8:
+                case Keys.D8:
+                    SetTime((int)(customMediaPlayer.Duration * 0.8), ValueChange.Set);
+                    break;
+
+                case Keys.NumPad9:
+                case Keys.D9:
+                    SetTime((int)(customMediaPlayer.Duration * 0.9), ValueChange.Set);
+                    break;
+            }
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        private void timerMouseMovement_Tick(object sender, EventArgs e)
+        {
+            if (Utility.ControlIsHover(customMediaPlayer))
+            {
+                Cursor.Hide();
+                panelMediaControl.Hide();
+            }
+        }
+
+        private void créerSoustitresToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            const string parentPath = "C:\\Users\\tigro\\source\\repos\\MediaPlayerWinforms\\Python\\SpeechToText";
+            if (Path.Exists(parentPath))
+            {
+                Debug.WriteLine("SpeechToText found");
+                if (customMediaPlayer.CurrentVideoPath != string.Empty)
+                {
+                    Debug.WriteLine($"Srt for {customMediaPlayer.CurrentVideoPath}");
+                    Utility.SrtMake(parentPath, customMediaPlayer.CurrentVideoPath);
+                }
+                else
+                    Debug.WriteLine("No media load");
+            }
+            else
+                Debug.WriteLine("SpeechToText folder in Python folder not found");
         }
     }
 }

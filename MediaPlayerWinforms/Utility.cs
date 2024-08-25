@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
@@ -32,6 +33,59 @@ namespace MediaPlayerWinforms
             using (var reader = new StreamReader(gzipStream, Encoding.UTF8))
             {
                 return reader.ReadToEnd();
+            }
+        }
+
+        public static bool ControlIsHover(Control control)
+        {
+            Point cursorPosition = Cursor.Position;
+
+            Point clientCursorPos = control.PointToClient(cursorPosition);
+
+            return control.ClientRectangle.Contains(clientCursorPos);
+        }
+
+        public static async void SrtMake(string parentPath, string filePath)
+        {
+            // Construct the PowerShell command
+            string command = $@"
+                & '{parentPath}\.venv\Scripts\Activate.ps1';
+                & '{parentPath}\.venv\Scripts\python.exe' '{parentPath}\main.py' --path '{filePath}'
+            ";
+            Debug.WriteLine(command);
+
+            await ExecutePowerShellCommandAsync(command);
+        }
+        static async Task ExecutePowerShellCommandAsync(string command)
+        {
+            // Configure the process to use PowerShell
+            var processInfo = new ProcessStartInfo
+            {
+                FileName = "powershell.exe",
+                Arguments = $"-NoProfile -ExecutionPolicy Bypass -Command \"{command}\"",
+                UseShellExecute = true,  // Required to show the window
+                CreateNoWindow = false,  // Ensure the window is created
+                WindowStyle = ProcessWindowStyle.Normal // Set the window style to normal
+            };
+
+            // Start the process
+            using (var process = new Process { StartInfo = processInfo })
+            {
+                try
+                {
+                    Debug.WriteLine("Start Srt creation");
+                    process.Start();
+
+                    // Wait for the process to exit
+                    await Task.Run(() => process.WaitForExit());
+
+                    Debug.WriteLine("End Srt creation");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("An exception occurred:");
+                    Console.WriteLine(ex.Message);
+                }
             }
         }
     }

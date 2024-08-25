@@ -55,6 +55,8 @@ namespace MediaPlayerWinforms
             timeJumpToolStripMenuItem = new ToolStripMenuItem();
             secondesToolStripMenuItem = new ToolStripMenuItem();
             secondesToolStripMenuItem1 = new ToolStripMenuItem();
+            outilsToolStripMenuItem = new ToolStripMenuItem();
+            créerSoustitresToolStripMenuItem = new ToolStripMenuItem();
             panelMediaControl = new Panel();
             loopPictureBox = new PictureBox();
             fullScrenPictureBox = new PictureBox();
@@ -101,8 +103,8 @@ namespace MediaPlayerWinforms
             // timerMouseMovement
             // 
             timerMouseMovement.Enabled = true;
-            timerMouseMovement.Interval = 200;
-            timerMouseMovement.Tick += timerMouvementMouse_Tick;
+            timerMouseMovement.Interval = 5000;
+            timerMouseMovement.Tick += timerMouseMovement_Tick;
             // 
             // playPictureBox
             // 
@@ -119,7 +121,7 @@ namespace MediaPlayerWinforms
             // menuStrip
             // 
             menuStrip.ImageScalingSize = new Size(20, 20);
-            menuStrip.Items.AddRange(new ToolStripItem[] { médiaToolStripMenuItem, lectureToolStripMenuItem, audioToolStripMenuItem, vidéoToolStripMenuItem, optionsToolStripMenuItem });
+            menuStrip.Items.AddRange(new ToolStripItem[] { médiaToolStripMenuItem, lectureToolStripMenuItem, audioToolStripMenuItem, vidéoToolStripMenuItem, optionsToolStripMenuItem, outilsToolStripMenuItem });
             menuStrip.Location = new Point(0, 0);
             menuStrip.Name = "menuStrip";
             menuStrip.Size = new Size(882, 24);
@@ -275,6 +277,20 @@ namespace MediaPlayerWinforms
             secondesToolStripMenuItem1.Text = "10 secondes";
             secondesToolStripMenuItem1.Click += tenSecondesToolStripMenuItem1_Click;
             // 
+            // outilsToolStripMenuItem
+            // 
+            outilsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { créerSoustitresToolStripMenuItem });
+            outilsToolStripMenuItem.Name = "outilsToolStripMenuItem";
+            outilsToolStripMenuItem.Size = new Size(50, 20);
+            outilsToolStripMenuItem.Text = "Outils";
+            // 
+            // créerSoustitresToolStripMenuItem
+            // 
+            créerSoustitresToolStripMenuItem.Name = "créerSoustitresToolStripMenuItem";
+            créerSoustitresToolStripMenuItem.Size = new Size(160, 22);
+            créerSoustitresToolStripMenuItem.Text = "Créer sous-titres";
+            créerSoustitresToolStripMenuItem.Click += créerSoustitresToolStripMenuItem_Click;
+            // 
             // panelMediaControl
             // 
             panelMediaControl.BackColor = Color.DimGray;
@@ -297,7 +313,6 @@ namespace MediaPlayerWinforms
             panelMediaControl.Name = "panelMediaControl";
             panelMediaControl.Size = new Size(882, 108);
             panelMediaControl.TabIndex = 11;
-            panelMediaControl.MouseEnter += panelMediaControl_MouseEnter;
             // 
             // loopPictureBox
             // 
@@ -534,11 +549,9 @@ namespace MediaPlayerWinforms
             Controls.Add(panelMediaControl);
             Controls.Add(menuStrip);
             Icon = (Icon)resources.GetObject("$this.Icon");
-            KeyPreview = true;
             MainMenuStrip = menuStrip;
             Name = "MainForm";
             Text = "MediaPlayer";
-            KeyDown += MainForm_KeyDown;
             ((System.ComponentModel.ISupportInitialize)playPictureBox).EndInit();
             menuStrip.ResumeLayout(false);
             menuStrip.PerformLayout();
@@ -604,5 +617,7 @@ namespace MediaPlayerWinforms
         private ToolStripMenuItem secondesToolStripMenuItem1;
         private PictureBox loopPictureBox;
         private PictureBox fullScrenPictureBox;
+        private ToolStripMenuItem outilsToolStripMenuItem;
+        private ToolStripMenuItem créerSoustitresToolStripMenuItem;
     }
 }

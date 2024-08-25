@@ -87,7 +87,7 @@ namespace MediaPlayerWinforms.CustomControls
             FillBackRectangle(e);
             FillForeRectangle(e, Value);
 
-            if (IsHover())
+            if (Utility.ControlIsHover(this))
                 DrawValueText(e.Graphics);
 
             
@@ -141,13 +141,5 @@ namespace MediaPlayerWinforms.CustomControls
 
             OnMouseDownForMediaPlayer.Invoke(newVolume);
         }
-
-        private bool IsHover()
-        {
-            Point clientPos = PointToClient(MousePosition);
-            return clientPos.Y >= 0 && clientPos.Y < Height &&
-                   clientPos.X >= 0 && clientPos.X < Width;
-        }
-
     }
 }

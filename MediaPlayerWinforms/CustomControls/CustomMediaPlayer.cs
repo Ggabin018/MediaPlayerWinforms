@@ -80,6 +80,8 @@ namespace MediaPlayerWinforms.CustomControls
             get => Audio.Volume; set => Audio.Volume = value;
         }
         public bool IsPaused { get => State == MediaStates.Paused;}
+        public string CurrentVideoPath { get => currentVideoPath;}
+
         public void AddToQueue(string path)
         {
             _listNextVideos.Add(path);

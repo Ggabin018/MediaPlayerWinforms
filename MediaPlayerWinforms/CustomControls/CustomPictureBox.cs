@@ -1,34 +1,42 @@
 ﻿using MediaToolkit.Model;
 using MediaToolkit.Options;
 using MediaToolkit;
-using System.Diagnostics;
-using System.Drawing;
 
 namespace MediaPlayerWinforms.CustomControls
 {
     public class CustomPictureBox : PictureBox
     {
         private string _videoPath;
+        private bool _isPlaylistHead;
+        private int _index;
 
-        public string VideoPath { get => _videoPath; set => _videoPath = value; }
+        private Size _boxSize = new(200, 50);
 
-        public event Action<string> LoadAndPlay;
+        public string VideoPath { get => _videoPath;}
+        public bool IsPlaylistHead { get => _isPlaylistHead; set => _isPlaylistHead = value; }
+        public int Index { get => _index; set => _index = value; }
 
-        public CustomPictureBox(string videoPath, Size boxSize) : base()
+        public event Action<CustomPictureBox> LoadAndPlay;
+
+        public CustomPictureBox(string videoPath, bool isPlaylistHead, int i, Action<CustomPictureBox> loadAndPlay) : base()
         {
             _videoPath = videoPath;
-            Size = boxSize;
+            _isPlaylistHead = isPlaylistHead;
+            _index = i;
+            LoadAndPlay = loadAndPlay;
+
             BackColor = Color.Black;
             SizeMode = PictureBoxSizeMode.Zoom;
             string framePath = GetImageFromVideo(videoPath);
             Image = new Bitmap(framePath);
             Click += CustomPictureBox_Click;
+
             Tag = 1;
         }
 
         private void CustomPictureBox_Click(object? sender, EventArgs e)
         {
-            LoadAndPlay(VideoPath);
+            LoadAndPlay(this);
         }
 
         private string GetImageFromVideo(string videoPath)
@@ -43,7 +51,7 @@ namespace MediaPlayerWinforms.CustomControls
 
             string videoName = Path.GetFileNameWithoutExtension(videoPath);
             string dbVideoName = Path.GetFileName(Path.GetDirectoryName(videoPath));
-            Debug.WriteLine(dbVideoName);
+            Console.WriteLine(dbVideoName);
             string middleFramePath = Path.Combine(dbImagesDirectory, dbVideoName + "_" + videoName + ".png");
             
             if (File.Exists(middleFramePath))
@@ -84,7 +92,7 @@ namespace MediaPlayerWinforms.CustomControls
             resizedImage.Save(imagePath);
 
 
-            Debug.WriteLine($"Frames extracted successfully from {videoName}.");
+            Console.WriteLine($"Frames extracted successfully from {videoName}.");
             return middleFramePath;
         }
     }

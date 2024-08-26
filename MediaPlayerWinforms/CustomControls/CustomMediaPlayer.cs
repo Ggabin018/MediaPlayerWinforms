@@ -1,14 +1,7 @@
-﻿using System;
-using System.ComponentModel;
-using System.Configuration;
-using System.Diagnostics;
+﻿using System.ComponentModel;
 using System.Net;
-using System.Security.Policy;
 using Vlc.DotNet.Core;
 using Vlc.DotNet.Core.Interops.Signatures;
-using Vlc.DotNet.Forms;
-using static MediaToolkit.Model.Metadata;
-using static System.Windows.Forms.Design.AxImporter;
 
 namespace MediaPlayerWinforms.CustomControls
 {
@@ -20,13 +13,14 @@ namespace MediaPlayerWinforms.CustomControls
         LoopAll,
         InfiniteLoop
     }
+
     class CustomMediaPlayer : Vlc.DotNet.Forms.VlcControl
     {
-        List<string> _listNextVideos = new List<string>();
-        Stack<string> _stackPrecedentVideos = new Stack<string>();
-        string currentVideoPath = "";
-        
-        public event Action<string, string> LocalDatabaseAddToHistoric;
+        List<CustomPictureBox> _playlist = [];
+        int currentVideoId = 0;
+        public string CurrentVideoPath { get => _playlist[currentVideoId].VideoPath; }
+
+        public event Action<string> LocalDatabaseAddToHistoric;
         public event Action<int> InitProgressBar;
         public event Action<string> GoToThisVideoInQueuePanel;
 
@@ -61,7 +55,7 @@ namespace MediaPlayerWinforms.CustomControls
                  VlcMedia media = GetCurrentMedia();
                 if (media != null)
                     return media.Duration.TotalSeconds;
-                Debug.WriteLineIf(true, "Duration not set");
+                Console.WriteLine("Duration not set");
                 return 0;
             } 
         }
@@ -80,113 +74,82 @@ namespace MediaPlayerWinforms.CustomControls
             get => Audio.Volume; set => Audio.Volume = value;
         }
         public bool IsPaused { get => State == MediaStates.Paused;}
-        public string CurrentVideoPath { get => currentVideoPath;}
+        public int? CurrentVideoId { get => currentVideoId;}
 
-        public void AddToQueue(string path)
+        public void AddToWaitList(string path)
         {
-            _listNextVideos.Add(path);
+            AssertVideoPath(path);
+
+            CustomPictureBox videoBloc = new (path, _playlist.Count == 0, _playlist.Count, LoadMediaAndPlay);
+
+            _playlist.Add(videoBloc);
         }
 
-        public string? Next(bool forceFlag)
+        public void Next(bool forceFlag)
         {
-            if (_listNextVideos.Count == 0) /// NEED MODIF WITH LOOP ALL
-                return null;
-
-            switch (LoopVar)
+            if (_playlist.Count == 0)
             {
-                case LoopType.NoLoop:
-                    _loopCount = 0;
-                    forceFlag = true;
-                    break;
-                case LoopType.LoopAll:
-                    throw new NotImplementedException();
-                case LoopType.Loop1time:
-                    _loopCount = 1;
-                    break;
-                case LoopType.LoopNtimes:
-                    _loopCount = LoopN;
-                    break;
-                case LoopType.InfiniteLoop:
-                    Play(currentVideoPath);
-                    // bug, not playing
-                    return null;
+                Console.WriteLine("Empty playlist");
             }
 
-            _loopCounter++;
+            //switch (LoopVar)
+            //{
+            //    case LoopType.NoLoop:
+            //        _loopCount = 0;
+            //        forceFlag = true;
+            //        break;
+            //    case LoopType.LoopAll:
+            //        throw new NotImplementedException();
+            //    case LoopType.Loop1time:
+            //        _loopCount = 1;
+            //        break;
+            //    case LoopType.LoopNtimes:
+            //        _loopCount = LoopN;
+            //        break;
+            //    case LoopType.InfiniteLoop:
+            //        Play(_playlist[currentVideoId]);
+            //        // bug, not playing
+            //        return null;
+            //}
 
-            if (forceFlag || _loopCounter > _loopCount)
+            //_loopCounter++;
+
+            //if (forceFlag || _loopCounter > _loopCount)
+            //{
+            //    string path = _listNextVideos[0];
+            //    _stackPrecedentVideos.Push(path);
+
+            //    _loopCounter = 0;
+            //    return path;
+            //}
+
+            if (currentVideoId + 1 < _playlist.Count)
             {
-                string path = _listNextVideos[0];
-                _listNextVideos.RemoveAt(0);
-                _stackPrecedentVideos.Push(path);
-
-                _loopCounter = 0;
-                return path;
+                LoadMediaAndPlay(_playlist[currentVideoId+1]);
             }
-            return null;
         }
 
-        public string? Precedent()
+        public void Precedent()
         {
-            /// weird mix on prec cur next
-            if (_stackPrecedentVideos.Count == 0)
-                return null;
-            string path = _stackPrecedentVideos.Pop();
-            _listNextVideos.Insert(0, path);
-            return path;
+            if (_playlist.Count == 0)
+                return;
+
+            if (currentVideoId != 0)
+            {
+                LoadMediaAndPlay(_playlist[currentVideoId-1]);
+            }
         }
 
         public async void LoadMediaAndPlay(string url)
         {
-            Debug.WriteLine("LOAD MEDIA AND PLAY");
+            Console.WriteLine("LOAD MEDIA AND PLAY FROM URL");
 
-            string URL = "";
-            string name = "";
+            AddToWaitList(url);
+            currentVideoId = _playlist.Count - 1;
 
-            // Test if it is a good file
-            if (url.StartsWith("http://") || url.StartsWith("https://"))
-            {
-                try
-                {
-                    var videoStreamUrl = await VideoUrlChecker.GetVideoStreamUrlAsync(url);
+            Play(uri: new Uri(url));
 
-                    if (videoStreamUrl != null)
-                    {
-                        URL = url;
-                        name = Path.GetFileName(new Uri(url).LocalPath);
-                    }
-                }
-                catch (WebException)
-                {
-                    throw new Exception("Erreur lors de la requête (par exemple, le fichier n'existe pas)");
-                }
-                if (URL == "")
-                    throw new Exception("Le fichier en ligne n'existe pas ou n'est pas une vidéo");
-            }
-            else
-            {
-                if (File.Exists(url))
-                {
-                    string[] videoExtensions = { ".mp4", ".avi", ".mov", ".mkv", ".wmv", ".webm" };
-                    string fileExtension = Path.GetExtension(url).ToLower();
-
-                    if (videoExtensions.Contains(fileExtension))
-                    {
-                        URL = url;
-                        name = Path.GetFileName(url);
-                    }
-                }
-                if (URL == "")
-                    throw new Exception("Le fichier local n'existe pas ou n'est pas une vidéo");
-            }
-
-            Play(uri: new Uri(URL));
-
-            if (currentVideoPath != "")
-                _stackPrecedentVideos.Push(currentVideoPath);
-            currentVideoPath = URL;
-            GoToThisVideoInQueuePanel(URL);
-            LocalDatabaseAddToHistoric(name, URL);
+            LocalDatabaseAddToHistoric(url);
 
             //time to load media
             await Task.Delay(1000);
@@ -205,8 +168,35 @@ namespace MediaPlayerWinforms.CustomControls
 
             InitProgressBar((int)duration);
 
-            Video.IsKeyInputEnabled = true;
-            //Video.IsMouseInputEnabled = false;
+            DebugWaitList();
+        }
+
+        public async void LoadMediaAndPlay(CustomPictureBox pictureBox)
+        {
+            Console.WriteLine("LOAD MEDIA AND PLAY FROM CustomPictureBox");
+
+            currentVideoId = pictureBox.Index;
+
+            Play(uri: new Uri(pictureBox.VideoPath));
+
+            LocalDatabaseAddToHistoric(pictureBox.VideoPath);
+
+            //time to load media
+            await Task.Delay(1000);
+
+            double duration = 0;
+            int nTry = 100;
+            while (duration == 0 && nTry > 0)
+            {
+                await Task.Delay(10);
+                duration = Duration;
+                nTry--;
+            }
+            if (duration == 0)
+                throw new Exception("Duration 0 !");
+            labelTotalMediaTime.Text = $"{TimeSpan.FromSeconds(duration):hh\\:mm\\:ss}";
+
+            InitProgressBar((int)duration);
 
             DebugWaitList();
         }
@@ -220,11 +210,53 @@ namespace MediaPlayerWinforms.CustomControls
 
         public void DebugWaitList()
         {
-            List<string> tmpList = _stackPrecedentVideos.ToList();
-            tmpList.Reverse();
-            tmpList.ForEach(video => { Debug.WriteLine($"PRECEDENT {Path.GetFileNameWithoutExtension(video)}"); });
-            Debug.WriteLine($"CURRENT {Path.GetFileNameWithoutExtension(Path.GetFileNameWithoutExtension(currentVideoPath))}");
-            _listNextVideos.ForEach(video => { Debug.WriteLine($"NEXT {Path.GetFileNameWithoutExtension(video)}"); });
+            Console.WriteLine("\nDebugWaitList : ");
+            for (int i = 0; i < _playlist.Count; i++)
+            {
+                CustomPictureBox videoBloc = _playlist[i];
+                string videoInfo = $"path : {videoBloc.VideoPath}\n";
+                videoInfo += $"Head : {videoBloc.IsPlaylistHead}\n";
+                videoInfo += $"Current : {i == CurrentVideoId}\n";
+                videoInfo += $"index : {videoBloc.Index}\n";
+                Console.WriteLine(videoInfo);
+            }
         }
+
+        private async void AssertVideoPath(string url)
+        {
+            if (url.StartsWith("http://") || url.StartsWith("https://"))
+            {
+                try
+                {
+                    var videoStreamUrl = await VideoUrlChecker.GetVideoStreamUrlAsync(url);
+
+                    if (videoStreamUrl != null)
+                    {
+                        return;
+                    }
+                }
+                catch (WebException)
+                {
+                    throw new Exception("Erreur lors de la requête (par exemple, le fichier n'existe pas)");
+                }
+                throw new Exception("Le fichier en ligne n'existe pas ou n'est pas une vidéo");
+            }
+            else
+            {
+                if (File.Exists(url))
+                {
+                    string[] videoExtensions = { ".mp4", ".avi", ".mov", ".mkv", ".wmv", ".webm" };
+                    string fileExtension = Path.GetExtension(url).ToLower();
+
+                    if (videoExtensions.Contains(fileExtension))
+                    {
+                        return;
+                    }
+                }
+                throw new Exception("Le fichier local n'existe pas ou n'est pas une vidéo");
+            }
+        }
+
+        
     }
 }

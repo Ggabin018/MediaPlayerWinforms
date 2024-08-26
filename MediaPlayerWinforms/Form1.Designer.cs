@@ -32,8 +32,6 @@ namespace MediaPlayerWinforms
         {
             components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            ImageListQueue = new ImageList(components);
-            timerMouseMovement = new System.Windows.Forms.Timer(components);
             playPictureBox = new PictureBox();
             menuStrip = new MenuStrip();
             médiaToolStripMenuItem = new ToolStripMenuItem();
@@ -93,18 +91,6 @@ namespace MediaPlayerWinforms
             timeWithProgressBar.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)customMediaPlayer).BeginInit();
             SuspendLayout();
-            // 
-            // ImageListQueue
-            // 
-            ImageListQueue.ColorDepth = ColorDepth.Depth32Bit;
-            ImageListQueue.ImageSize = new Size(16, 16);
-            ImageListQueue.TransparentColor = Color.Transparent;
-            // 
-            // timerMouseMovement
-            // 
-            timerMouseMovement.Enabled = true;
-            timerMouseMovement.Interval = 5000;
-            timerMouseMovement.Tick += timerMouseMovement_Tick;
             // 
             // playPictureBox
             // 
@@ -510,13 +496,11 @@ namespace MediaPlayerWinforms
             // customQueuePanel
             // 
             customQueuePanel.AutoScroll = true;
-            customQueuePanel.AutoSize = true;
-            customQueuePanel.BoxSize = new Size(200, 50);
             customQueuePanel.Dock = DockStyle.Right;
-            customQueuePanel.Location = new Point(882, 24);
+            customQueuePanel.Location = new Point(682, 24);
             customQueuePanel.MaxNumberOfPanel = 30;
             customQueuePanel.Name = "customQueuePanel";
-            customQueuePanel.Size = new Size(0, 425);
+            customQueuePanel.Size = new Size(200, 425);
             customQueuePanel.TabIndex = 13;
             // 
             // customMediaPlayer
@@ -530,7 +514,7 @@ namespace MediaPlayerWinforms
             customMediaPlayer.Margin = new Padding(3, 2, 3, 2);
             customMediaPlayer.Name = "customMediaPlayer";
             customMediaPlayer.PositionSeconds = 0D;
-            customMediaPlayer.Size = new Size(882, 425);
+            customMediaPlayer.Size = new Size(682, 425);
             customMediaPlayer.Spu = -1;
             customMediaPlayer.TabIndex = 14;
             customMediaPlayer.Text = "customMediaPlayer1";
@@ -574,8 +558,6 @@ namespace MediaPlayerWinforms
         }
 
         #endregion
-        private ImageList ImageListQueue;
-        private System.Windows.Forms.Timer timerMouseMovement;
         private PictureBox playPictureBox;
         private MenuStrip menuStrip;
         private ToolStripMenuItem médiaToolStripMenuItem;

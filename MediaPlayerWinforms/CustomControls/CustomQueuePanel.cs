@@ -1,6 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Diagnostics;
-using System.IO;
 
 
 
@@ -9,16 +7,13 @@ namespace MediaPlayerWinforms.CustomControls
     class CustomQueuePanel : FlowLayoutPanel
     {
         private int _maxNumberOfPanel = 30;
-        private Size _boxSize = new(200, 50);
-        private List<CustomPictureBox> _listButtons = [];
+        
+        private List<PictureBox> _listVideoBloc = [];
 
         public event Action<string> LoadAndPlay;
 
         [Category("Custom Controls")]
         public int MaxNumberOfPanel { get => _maxNumberOfPanel; set => _maxNumberOfPanel = value; }
-
-        [Category("Custom Controls")]
-        public Size BoxSize { get => _boxSize; set => _boxSize = value; }
 
         public CustomQueuePanel() => AutoScroll = true;
 
@@ -29,29 +24,29 @@ namespace MediaPlayerWinforms.CustomControls
         }
         public void Next()
         {
-            if (_listButtons.Count > 0)
-                RemoveControl(_listButtons[0]);
-            else
-                Debug.WriteLine("_listButtons Empty");
+            //if (_listVideoBloc.Count > 0)
+            //    RemoveControl(_listVideoBloc[0]);
+            //else
+            //    Console.WriteLine("_listButtons Empty");
         }
 
         public void Precedent(string path)
         {
-            CustomPictureBox pb = new(path, BoxSize);
-            pb.LoadAndPlay += LoadAndPlay;
+            //CustomPictureBox pb = new(path, BoxSize);
+            //pb.LoadAndPlay += LoadAndPlay;
 
-            _listButtons.Insert(0, pb);
-            Controls.Add(pb);
-            Controls.SetChildIndex(pb,0);
+            //_listVideoBloc.Insert(0, pb);
+            //Controls.Add(pb);
+            //Controls.SetChildIndex(pb,0);
         }
 
         public void Add(string path)
         {
-            CustomPictureBox pb = new(path, BoxSize);
-            pb.LoadAndPlay += LoadAndPlay;
+            //CustomPictureBox pb = new(path, BoxSize);
+            //pb.LoadAndPlay += LoadAndPlay;
 
-            _listButtons.Add(pb);
-            Controls.Add(pb);
+            //_listVideoBloc.Add(pb);
+            //Controls.Add(pb);
         }
 
         public void GoToThisVideoInQueuePanel(string path)
@@ -67,7 +62,7 @@ namespace MediaPlayerWinforms.CustomControls
                         break;
                     }
                     else
-                        RemoveControl(customPictureBox);
+                        customPictureBox.Enabled = false;
                 }
             }
         }

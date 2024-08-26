@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO.Compression;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using YoutubeExplode;
-using YoutubeExplode.Videos.Streams;
 
 namespace MediaPlayerWinforms
 {
@@ -52,7 +46,7 @@ namespace MediaPlayerWinforms
                 & '{parentPath}\.venv\Scripts\Activate.ps1';
                 & '{parentPath}\.venv\Scripts\python.exe' '{parentPath}\main.py' --path '{filePath}'
             ";
-            Debug.WriteLine(command);
+            Console.WriteLine(command);
 
             await ExecutePowerShellCommandAsync(command);
         }
@@ -73,13 +67,13 @@ namespace MediaPlayerWinforms
             {
                 try
                 {
-                    Debug.WriteLine("Start Srt creation");
+                    Console.WriteLine("Start Srt creation");
                     process.Start();
 
                     // Wait for the process to exit
                     await Task.Run(() => process.WaitForExit());
 
-                    Debug.WriteLine("End Srt creation");
+                    Console.WriteLine("End Srt creation");
                 }
                 catch (Exception ex)
                 {

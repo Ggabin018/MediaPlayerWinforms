@@ -29,12 +29,12 @@ namespace MediaPlayerWinforms
         private static readonly Mutex mutexSetTime = new Mutex();
         private static readonly Mutex mutexSetVolume = new();
 
+        private bool IsUiHidden = false;
+
 
         public MainForm()
         {
             InitializeComponent();
-
-            timerMouseMovement.Start();
 
             // Link event
             mediaCustomProgressBar.OnClickProgressBarForMediaPlayer += customMediaPlayer.OnClickProgressBarForMediaPlayer;
@@ -228,11 +228,9 @@ namespace MediaPlayerWinforms
                     // Iterate through the selected files
                     string[] filePaths = openFileDialog.FileNames;
                     customMediaPlayer.LoadMediaAndPlay(filePaths[0]);
-                    customQueuePanel.Add(filePaths[0]);
                     for (int i = 1; i < filePaths.Length; i++)
                     {
-                        customMediaPlayer.AddToQueue(filePaths[i]);
-                        customQueuePanel.Add(filePaths[i]);
+                        customMediaPlayer.AddToWaitList(filePaths[i]);
                     }
                 }
             }
@@ -254,11 +252,9 @@ namespace MediaPlayerWinforms
                               .ToList();
 
                         customMediaPlayer.LoadMediaAndPlay(filePaths[0]);
-                        customQueuePanel.Add(filePaths[0]);
                         for (int i = 1; i < filePaths.Count; i++)
                         {
-                            customMediaPlayer.AddToQueue(filePaths[i]);
-                            customQueuePanel.Add(filePaths[i]);
+                            customMediaPlayer.AddToWaitList(filePaths[i]);
                         }
                     }
                     catch (UnauthorizedAccessException uAEx)
@@ -284,12 +280,12 @@ namespace MediaPlayerWinforms
         {
             if (customQueuePanel.Visible)
             {
-                Debug.WriteLine("customQueuePanel HIDE");
+                Console.WriteLine("customQueuePanel HIDE");
                 customQueuePanel.Hide();
             }
             else
             {
-                Debug.WriteLine("customQueuePanel SHOW");
+                Console.WriteLine("customQueuePanel SHOW");
                 customQueuePanel.Show();
             }
 
@@ -339,15 +335,9 @@ namespace MediaPlayerWinforms
 
         private void customMediaPlayer_EndReached(object sender, Vlc.DotNet.Core.VlcMediaPlayerEndReachedEventArgs e)
         {
-            Debug.WriteLine("END REACH");
+            Console.WriteLine("END REACH");
 
-            string? path = customMediaPlayer.Next(false);
-
-            if (path != null)
-            {
-                customQueuePanel.Next();
-                customMediaPlayer.LoadMediaAndPlay(path);
-            }
+            customMediaPlayer.Next(false);
         }
 
         private void flushHistoryToolStripMenuItem_Click(object sender, EventArgs e)
@@ -361,12 +351,7 @@ namespace MediaPlayerWinforms
 
         private void OnPrecedent()
         {
-            string? path = customMediaPlayer.Precedent();
-            if (path != null)
-            {
-                customQueuePanel.Precedent(path);
-                customMediaPlayer.LoadMediaAndPlay(path);
-            }
+            customMediaPlayer.Precedent();
         }
         private void precedentPictureBox_Click(object sender, EventArgs e)
         {
@@ -374,13 +359,7 @@ namespace MediaPlayerWinforms
         }
         private void OnNext()
         {
-            string? path = customMediaPlayer.Next(true);
-
-            if (path != null)
-            {
-                customQueuePanel.Next();
-                customMediaPlayer.LoadMediaAndPlay(path);
-            }
+            customMediaPlayer.Next(true);
         }
         private void NextPictureBox_Click(object sender, EventArgs e)
         {
@@ -463,23 +442,13 @@ namespace MediaPlayerWinforms
 
             if (m.Msg == WM_MOUSEMOVE)
             {
-                OnActivity();
+                // mouse move detection
             }
-        }
-
-        private void OnActivity()
-        {
-            timerMouseMovement.Stop();
-            timerMouseMovement.Start();
-            Cursor.Show();
-            panelMediaControl.Show();
         }
 
         // Override ProcessCmdKey to capture arrow key presses
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            OnActivity();
-
             switch (keyData)
             {
                 case Keys.Space:
@@ -578,17 +547,22 @@ namespace MediaPlayerWinforms
                 case Keys.D9:
                     SetTime((int)(customMediaPlayer.Duration * 0.9), ValueChange.Set);
                     break;
+                case Keys.H:
+                    if (IsUiHidden)
+                    {
+                        Cursor.Show();
+                        panelMediaControl.Show();
+                        IsUiHidden = false;
+                    }
+                    else
+                    {
+                        Cursor.Hide();
+                        panelMediaControl.Hide();
+                        IsUiHidden = true;
+                    }
+                    break;
             }
             return base.ProcessCmdKey(ref msg, keyData);
-        }
-
-        private void timerMouseMovement_Tick(object sender, EventArgs e)
-        {
-            if (Utility.ControlIsHover(customMediaPlayer))
-            {
-                Cursor.Hide();
-                panelMediaControl.Hide();
-            }
         }
 
         private void créerSoustitresToolStripMenuItem_Click(object sender, EventArgs e)
@@ -596,17 +570,17 @@ namespace MediaPlayerWinforms
             const string parentPath = "C:\\Users\\tigro\\source\\repos\\MediaPlayerWinforms\\Python\\SpeechToText";
             if (Path.Exists(parentPath))
             {
-                Debug.WriteLine("SpeechToText found");
+                Console.WriteLine("SpeechToText found");
                 if (customMediaPlayer.CurrentVideoPath != string.Empty)
                 {
-                    Debug.WriteLine($"Srt for {customMediaPlayer.CurrentVideoPath}");
+                    Console.WriteLine($"Srt for {customMediaPlayer.CurrentVideoPath}");
                     Utility.SrtMake(parentPath, customMediaPlayer.CurrentVideoPath);
                 }
                 else
-                    Debug.WriteLine("No media load");
+                    Console.WriteLine("No media load");
             }
             else
-                Debug.WriteLine("SpeechToText folder in Python folder not found");
+                Console.WriteLine("SpeechToText folder in Python folder not found");
         }
     }
 }

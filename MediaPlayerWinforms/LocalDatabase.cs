@@ -36,8 +36,18 @@ namespace MediaPlayerWinforms
             }
         }
 
-        public void AddToHistoric(string name, string path)
+        private string GetNameFromUrl(string url)
         {
+            if (url.StartsWith("http://") || url.StartsWith("https://"))
+            {
+                return Path.GetFileName(new Uri(url).LocalPath);
+            }
+            return Path.GetFileName(url);
+        }
+
+        public void AddToHistoric(string path)
+        {
+            string name = GetNameFromUrl(path);
             using (SQLiteConnection connection = new(connectionString))
             {
                 connection.Open();
@@ -137,7 +147,7 @@ namespace MediaPlayerWinforms
                         {
                             string name = Utility.Decompress((byte[])reader["Name"]);
                             string path = Utility.Decompress((byte[])reader["Path"]);
-                            Debug.WriteLine($"Name: {name}, Path: {path}");
+                            Console.WriteLine($"Name: {name}, Path: {path}");
                         }
                     }
                 }

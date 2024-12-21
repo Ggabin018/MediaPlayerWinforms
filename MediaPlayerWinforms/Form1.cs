@@ -1,21 +1,16 @@
-﻿using System.Diagnostics;
-using System.Net;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using System.Windows.Forms;
-using System.Reflection;
-using System.Text.RegularExpressions;
+﻿using System.ComponentModel;
 
 namespace MediaPlayerWinforms
 {
-    public enum ValueChange
-    {
-        Add,
-        Sub,
-        Set
-    }
     public partial class MainForm : Form
     {
+        public enum ValueChange
+        {
+            Add,
+            Sub,
+            Set
+        }
+
         // attributes
         Point precedentMousePosition = new(0, 0);
         bool isFullScreen = false;
@@ -24,28 +19,36 @@ namespace MediaPlayerWinforms
         int volumeValueBeforeMute = 100;
 
         int totalSeconds = 0;
-        LocalDatabase localDatabase = new();
+        private readonly LocalDatabase localDatabase = new();
 
-        private static readonly Mutex mutexSetTime = new Mutex();
-        private static readonly Mutex mutexSetVolume = new();
+        private readonly Mutex mutexSetTime = new();
+        private readonly Mutex mutexSetVolume = new();
 
         private bool IsUiHidden = false;
 
+        private bool IsMuted = false;
+
+        private ToolStripMenuItem curModelSize;
 
         public MainForm()
         {
             InitializeComponent();
 
-            // Link event
-            mediaCustomProgressBar.OnClickProgressBarForMediaPlayer += customMediaPlayer.OnClickProgressBarForMediaPlayer;
+            customMediaPlayer.Video.IsMouseInputEnabled = false;
+            customMediaPlayer.Video.IsKeyInputEnabled = false;
+
+            curModelSize = baseToolStripMenuItem;
+
+        // Link event
+        mediaCustomProgressBar.OnClickProgressBarForMediaPlayer += customMediaPlayer.OnClickProgressBarForMediaPlayer;
             mediaPlayerSlider.OnMouseDownForMediaPlayer += customMediaPlayer.OnMouseDownForMediaPlayer;
             customMediaPlayer.LocalDatabaseAddToHistoric += localDatabase.AddToHistoric;
             customMediaPlayer.InitProgressBar += mediaCustomProgressBar.InitProgressBar;
-            customQueuePanel.LoadAndPlay += customMediaPlayer.LoadMediaAndPlay;
-            customMediaPlayer.GoToThisVideoInQueuePanel += customQueuePanel.GoToThisVideoInQueuePanel;
+            customMediaPlayer.ModifyFullScreen += ModifyFullScreen;
+            customMediaPlayer.AddToWaitlistDisplay += customQueuePanel.AddToWaitlistDisplay;
         }
 
-        private void ModifyFullScreen(bool? explicitModify)
+        public void ModifyFullScreen(bool? explicitModify)
         {
             if (explicitModify == null)
             {
@@ -195,11 +198,8 @@ namespace MediaPlayerWinforms
             }
         }
 
-        private void ouvrirUnFichierToolStripMenuItem_Click(object sender, EventArgs e)
+        private string? AskVideoPath()
         {
-            var fileContent = string.Empty;
-            var filePath = string.Empty;
-
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
                 openFileDialog.Filter = "video files|*.mp4;*.avi;*.mov;*.mkv;*.wmv;*.webm|All files (*.*)|*.*";
@@ -207,12 +207,20 @@ namespace MediaPlayerWinforms
 
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    //Get the _videoPath of specified file
-                    filePath = openFileDialog.FileName;
-
-                    customMediaPlayer.LoadMediaAndPlay(filePath);
+                    string filePath = openFileDialog.FileName;
+                    return filePath;
                 }
             }
+            return null;
+        }
+
+        private void ouvrirUnFichierToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            string? filePath = AskVideoPath();
+            if (filePath != null)
+                customMediaPlayer.LoadMediaAndPlay(filePath);
+            else
+                Console.WriteLine("No media to load");
         }
 
         private void ouvrirPlusieursFichiersToolStripMenuItem_Click(object sender, EventArgs e)
@@ -221,11 +229,10 @@ namespace MediaPlayerWinforms
             {
                 openFileDialog.Filter = "video files|*.mp4;*.avi;*.mov;*.mkv;*.wmv;*.webm|All files (*.*)|*.*";
                 openFileDialog.RestoreDirectory = true;
-                openFileDialog.Multiselect = true;  // Enable multi-selection
+                openFileDialog.Multiselect = true;
 
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
-                    // Iterate through the selected files
                     string[] filePaths = openFileDialog.FileNames;
                     customMediaPlayer.LoadMediaAndPlay(filePaths[0]);
                     for (int i = 1; i < filePaths.Length; i++)
@@ -291,10 +298,15 @@ namespace MediaPlayerWinforms
 
         }
 
-
         private void customMediaPlayer_Click(object sender, EventArgs e)
         {
             PlayPause();
+        }
+
+
+        private void customMediaPlayer_DoubleClick(object sender, EventArgs e)
+        {
+            ModifyFullScreen(null);
         }
 
         private void historiqueToolStripMenuItem_MouseHover(object sender, EventArgs e)
@@ -432,20 +444,6 @@ namespace MediaPlayerWinforms
             favPictureBox.BackgroundImage = Properties.Resources.fav_50;
         }
 
-
-        // Override the WndProc method to detect mouse movement at the form level
-        protected override void WndProc(ref Message m)
-        {
-            base.WndProc(ref m);
-
-            const int WM_MOUSEMOVE = 0x0200;
-
-            if (m.Msg == WM_MOUSEMOVE)
-            {
-                // mouse move detection
-            }
-        }
-
         // Override ProcessCmdKey to capture arrow key presses
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
@@ -567,20 +565,61 @@ namespace MediaPlayerWinforms
 
         private void créerSoustitresToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            const string parentPath = "C:\\Users\\tigro\\source\\repos\\MediaPlayerWinforms\\Python\\SpeechToText";
+            const string parentPath = "Python\\SpeechToText";
             if (Path.Exists(parentPath))
             {
                 Console.WriteLine("SpeechToText found");
-                if (customMediaPlayer.CurrentVideoPath != string.Empty)
+                try
                 {
                     Console.WriteLine($"Srt for {customMediaPlayer.CurrentVideoPath}");
-                    Utility.SrtMake(parentPath, customMediaPlayer.CurrentVideoPath);
+                    Utility.SrtMake(parentPath, customMediaPlayer.CurrentVideoPath, curModelSize.Text!);
                 }
-                else
-                    Console.WriteLine("No media load");
+                catch
+                {
+                    string? filePath = AskVideoPath();
+                    if (filePath != null)
+                    {
+                        Console.WriteLine($"Srt for {filePath}");
+                        Utility.SrtMake(parentPath, filePath, curModelSize.Text!);
+                    }
+                    else
+                        Console.WriteLine("No media load");
+                }
             }
             else
                 Console.WriteLine("SpeechToText folder in Python folder not found");
+        }
+
+        private void changeModelSize(ToolStripMenuItem item)
+        {
+            curModelSize.Image = null;
+            curModelSize = item;
+            curModelSize.Image = Properties.Resources.approved_96;
+        }
+
+        private void tinyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            changeModelSize(tinyToolStripMenuItem);
+        }
+
+        private void baseToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            changeModelSize(baseToolStripMenuItem);
+        }
+
+        private void smallToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            changeModelSize(baseToolStripMenuItem);
+        }
+
+        private void mediumToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            changeModelSize(mediumToolStripMenuItem);
+        }
+
+        private void largeToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            changeModelSize(largeToolStripMenuItem);
         }
     }
 }

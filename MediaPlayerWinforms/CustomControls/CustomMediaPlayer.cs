@@ -22,7 +22,8 @@ namespace MediaPlayerWinforms.CustomControls
 
         public event Action<string> LocalDatabaseAddToHistoric;
         public event Action<int> InitProgressBar;
-        public event Action<string> GoToThisVideoInQueuePanel;
+        public event Action<bool?> ModifyFullScreen;
+        public event Action<List<CustomPictureBox>> AddToWaitlistDisplay;
 
         LoopType _loopVar; // type of loop
         int _loopN = 0; // number of loop if LoopNtimes
@@ -43,7 +44,7 @@ namespace MediaPlayerWinforms.CustomControls
         public CustomMediaPlayer() : base()
         {
             Dock = DockStyle.Fill;
-            VlcLibDirectory = new("C:\\Program Files\\VideoLAN\\VLC");
+            VlcLibDirectory = new("libvlc");
 
             BackColor = Color.Black;
         }
@@ -74,15 +75,16 @@ namespace MediaPlayerWinforms.CustomControls
             get => Audio.Volume; set => Audio.Volume = value;
         }
         public bool IsPaused { get => State == MediaStates.Paused;}
-        public int? CurrentVideoId { get => currentVideoId;}
+        public int CurrentVideoId { get => currentVideoId;}
 
         public void AddToWaitList(string path)
         {
             AssertVideoPath(path);
 
             CustomPictureBox videoBloc = new (path, _playlist.Count == 0, _playlist.Count, LoadMediaAndPlay);
-
+            //videoBloc.Enabled = false;
             _playlist.Add(videoBloc);
+            AddToWaitlistDisplay(_playlist);
         }
 
         public void Next(bool forceFlag)
@@ -145,7 +147,13 @@ namespace MediaPlayerWinforms.CustomControls
             Console.WriteLine("LOAD MEDIA AND PLAY FROM URL");
 
             AddToWaitList(url);
+
+            //_playlist[currentVideoId].Enabled = false; // not empty because of AddToWaitList
+            _playlist[currentVideoId].BackColor = Color.Black;
+
             currentVideoId = _playlist.Count - 1;
+            _playlist[currentVideoId].BackColor = Color.Gray;
+            //_playlist[currentVideoId].Enabled = true;
 
             Play(uri: new Uri(url));
 
@@ -175,7 +183,10 @@ namespace MediaPlayerWinforms.CustomControls
         {
             Console.WriteLine("LOAD MEDIA AND PLAY FROM CustomPictureBox");
 
+            _playlist[currentVideoId].BackColor = Color.Black;
+
             currentVideoId = pictureBox.Index;
+            _playlist[currentVideoId].BackColor = Color.Gray;
 
             Play(uri: new Uri(pictureBox.VideoPath));
 
@@ -210,6 +221,7 @@ namespace MediaPlayerWinforms.CustomControls
 
         public void DebugWaitList()
         {
+            Console.ForegroundColor = ConsoleColor.Green;
             Console.WriteLine("\nDebugWaitList : ");
             for (int i = 0; i < _playlist.Count; i++)
             {
@@ -218,8 +230,11 @@ namespace MediaPlayerWinforms.CustomControls
                 videoInfo += $"Head : {videoBloc.IsPlaylistHead}\n";
                 videoInfo += $"Current : {i == CurrentVideoId}\n";
                 videoInfo += $"index : {videoBloc.Index}\n";
+                videoInfo += $"enabled : {videoBloc.Enabled}\n";
+                
                 Console.WriteLine(videoInfo);
             }
+            Console.ForegroundColor = ConsoleColor.White;
         }
 
         private async void AssertVideoPath(string url)
@@ -257,6 +272,28 @@ namespace MediaPlayerWinforms.CustomControls
             }
         }
 
-        
+
+        // Override the WndProc method to capture mouse clicks and double-clicks
+        protected override void WndProc(ref Message m)
+        {
+            base.WndProc(ref m);
+
+            const int WM_RBUTTONDOWN = 0x0204;
+
+            switch (m.Msg)
+            {
+                case WM_RBUTTONDOWN:
+                    OnRightMouseClick();
+                    break;
+            }
+        }
+
+        private void OnRightMouseClick()
+        {
+            MessageBox.Show("Right mouse button clicked!");
+            Point clientPos = PointToClient(MousePosition);
+            // TODO
+        }
+
     }
 }

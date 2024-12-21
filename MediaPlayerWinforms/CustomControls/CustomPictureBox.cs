@@ -9,12 +9,14 @@ namespace MediaPlayerWinforms.CustomControls
         private string _videoPath;
         private bool _isPlaylistHead;
         private int _index;
+        
 
         private Size _boxSize = new(200, 50);
 
         public string VideoPath { get => _videoPath;}
         public bool IsPlaylistHead { get => _isPlaylistHead; set => _isPlaylistHead = value; }
         public int Index { get => _index; set => _index = value; }
+        public Size BoxSize { get => _boxSize; set => _boxSize = value; }
 
         public event Action<CustomPictureBox> LoadAndPlay;
 
@@ -25,7 +27,7 @@ namespace MediaPlayerWinforms.CustomControls
             _index = i;
             LoadAndPlay = loadAndPlay;
 
-            BackColor = Color.Black;
+            BackColor = Color.Black; // change in function of current video playing or not
             SizeMode = PictureBoxSizeMode.Zoom;
             string framePath = GetImageFromVideo(videoPath);
             Image = new Bitmap(framePath);

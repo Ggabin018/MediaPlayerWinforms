@@ -39,13 +39,9 @@ namespace MediaPlayerWinforms
             return control.ClientRectangle.Contains(clientCursorPos);
         }
 
-        public static async void SrtMake(string parentPath, string filePath)
+        public static async void SrtMake(string parentPath, string filePath, string model)
         {
-            // Construct the PowerShell command
-            string command = $@"
-                & '{parentPath}\.venv\Scripts\Activate.ps1';
-                & '{parentPath}\.venv\Scripts\python.exe' '{parentPath}\main.py' --path '{filePath}'
-            ";
+            string command = $@"& '{parentPath}\.venv\Scripts\python.exe' '{parentPath}\main.py' --path '{filePath}' --model '{model}'";
             Console.WriteLine(command);
 
             await ExecutePowerShellCommandAsync(command);
@@ -59,7 +55,7 @@ namespace MediaPlayerWinforms
                 Arguments = $"-NoProfile -ExecutionPolicy Bypass -Command \"{command}\"",
                 UseShellExecute = true,  // Required to show the window
                 CreateNoWindow = false,  // Ensure the window is created
-                WindowStyle = ProcessWindowStyle.Normal // Set the window style to normal
+                WindowStyle = ProcessWindowStyle.Normal
             };
 
             // Start the process

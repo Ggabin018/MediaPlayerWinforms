@@ -48,13 +48,20 @@ namespace MediaPlayerWinforms
             couperLeSonToolStripMenuItem = new ToolStripMenuItem();
             vidéoToolStripMenuItem = new ToolStripMenuItem();
             pleinÉcranToolStripMenuItem = new ToolStripMenuItem();
+            soustitresToolStripMenuItem = new ToolStripMenuItem();
+            créerSoustitresToolStripMenuItem1 = new ToolStripMenuItem();
+            tailleDuModelToolStripMenuItem = new ToolStripMenuItem();
+            tinyToolStripMenuItem = new ToolStripMenuItem();
+            baseToolStripMenuItem = new ToolStripMenuItem();
+            smallToolStripMenuItem = new ToolStripMenuItem();
+            mediumToolStripMenuItem = new ToolStripMenuItem();
+            largeToolStripMenuItem = new ToolStripMenuItem();
             optionsToolStripMenuItem = new ToolStripMenuItem();
             flushHistoryToolStripMenuItem = new ToolStripMenuItem();
             timeJumpToolStripMenuItem = new ToolStripMenuItem();
             secondesToolStripMenuItem = new ToolStripMenuItem();
             secondesToolStripMenuItem1 = new ToolStripMenuItem();
             outilsToolStripMenuItem = new ToolStripMenuItem();
-            créerSoustitresToolStripMenuItem = new ToolStripMenuItem();
             panelMediaControl = new Panel();
             loopPictureBox = new PictureBox();
             fullScrenPictureBox = new PictureBox();
@@ -107,7 +114,7 @@ namespace MediaPlayerWinforms
             // menuStrip
             // 
             menuStrip.ImageScalingSize = new Size(20, 20);
-            menuStrip.Items.AddRange(new ToolStripItem[] { médiaToolStripMenuItem, lectureToolStripMenuItem, audioToolStripMenuItem, vidéoToolStripMenuItem, optionsToolStripMenuItem, outilsToolStripMenuItem });
+            menuStrip.Items.AddRange(new ToolStripItem[] { médiaToolStripMenuItem, lectureToolStripMenuItem, audioToolStripMenuItem, vidéoToolStripMenuItem, soustitresToolStripMenuItem, optionsToolStripMenuItem, outilsToolStripMenuItem });
             menuStrip.Location = new Point(0, 0);
             menuStrip.Name = "menuStrip";
             menuStrip.Size = new Size(882, 24);
@@ -223,6 +230,64 @@ namespace MediaPlayerWinforms
             pleinÉcranToolStripMenuItem.Text = "Plein écran";
             pleinÉcranToolStripMenuItem.Click += pleinÉcranToolStripMenuItem_Click;
             // 
+            // soustitresToolStripMenuItem
+            // 
+            soustitresToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { créerSoustitresToolStripMenuItem1, tailleDuModelToolStripMenuItem });
+            soustitresToolStripMenuItem.Name = "soustitresToolStripMenuItem";
+            soustitresToolStripMenuItem.Size = new Size(75, 20);
+            soustitresToolStripMenuItem.Text = "Sous-titres";
+            // 
+            // créerSoustitresToolStripMenuItem1
+            // 
+            créerSoustitresToolStripMenuItem1.Name = "créerSoustitresToolStripMenuItem1";
+            créerSoustitresToolStripMenuItem1.Size = new Size(180, 22);
+            créerSoustitresToolStripMenuItem1.Text = "Créer sous-titres";
+            créerSoustitresToolStripMenuItem1.Click += créerSoustitresToolStripMenuItem_Click;
+            // 
+            // tailleDuModelToolStripMenuItem
+            // 
+            tailleDuModelToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { tinyToolStripMenuItem, baseToolStripMenuItem, smallToolStripMenuItem, mediumToolStripMenuItem, largeToolStripMenuItem });
+            tailleDuModelToolStripMenuItem.Name = "tailleDuModelToolStripMenuItem";
+            tailleDuModelToolStripMenuItem.Size = new Size(180, 22);
+            tailleDuModelToolStripMenuItem.Text = "Taille du Model";
+            // 
+            // tinyToolStripMenuItem
+            // 
+            tinyToolStripMenuItem.Name = "tinyToolStripMenuItem";
+            tinyToolStripMenuItem.Size = new Size(184, 26);
+            tinyToolStripMenuItem.Text = "tiny";
+            tinyToolStripMenuItem.Click += tinyToolStripMenuItem_Click;
+            // 
+            // baseToolStripMenuItem
+            // 
+            baseToolStripMenuItem.BackgroundImageLayout = ImageLayout.None;
+            baseToolStripMenuItem.Image = Properties.Resources.approved_96;
+            baseToolStripMenuItem.Name = "baseToolStripMenuItem";
+            baseToolStripMenuItem.Size = new Size(184, 26);
+            baseToolStripMenuItem.Text = "base";
+            baseToolStripMenuItem.Click += baseToolStripMenuItem_Click;
+            // 
+            // smallToolStripMenuItem
+            // 
+            smallToolStripMenuItem.Name = "smallToolStripMenuItem";
+            smallToolStripMenuItem.Size = new Size(184, 26);
+            smallToolStripMenuItem.Text = "small";
+            smallToolStripMenuItem.Click += smallToolStripMenuItem_Click;
+            // 
+            // mediumToolStripMenuItem
+            // 
+            mediumToolStripMenuItem.Name = "mediumToolStripMenuItem";
+            mediumToolStripMenuItem.Size = new Size(184, 26);
+            mediumToolStripMenuItem.Text = "medium";
+            mediumToolStripMenuItem.Click += mediumToolStripMenuItem_Click;
+            // 
+            // largeToolStripMenuItem
+            // 
+            largeToolStripMenuItem.Name = "largeToolStripMenuItem";
+            largeToolStripMenuItem.Size = new Size(184, 26);
+            largeToolStripMenuItem.Text = "large";
+            largeToolStripMenuItem.Click += largeToolStripMenuItem_Click;
+            // 
             // optionsToolStripMenuItem
             // 
             optionsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { flushHistoryToolStripMenuItem, timeJumpToolStripMenuItem });
@@ -265,17 +330,9 @@ namespace MediaPlayerWinforms
             // 
             // outilsToolStripMenuItem
             // 
-            outilsToolStripMenuItem.DropDownItems.AddRange(new ToolStripItem[] { créerSoustitresToolStripMenuItem });
             outilsToolStripMenuItem.Name = "outilsToolStripMenuItem";
             outilsToolStripMenuItem.Size = new Size(50, 20);
             outilsToolStripMenuItem.Text = "Outils";
-            // 
-            // créerSoustitresToolStripMenuItem
-            // 
-            créerSoustitresToolStripMenuItem.Name = "créerSoustitresToolStripMenuItem";
-            créerSoustitresToolStripMenuItem.Size = new Size(160, 22);
-            créerSoustitresToolStripMenuItem.Text = "Créer sous-titres";
-            créerSoustitresToolStripMenuItem.Click += créerSoustitresToolStripMenuItem_Click;
             // 
             // panelMediaControl
             // 
@@ -498,7 +555,6 @@ namespace MediaPlayerWinforms
             customQueuePanel.AutoScroll = true;
             customQueuePanel.Dock = DockStyle.Right;
             customQueuePanel.Location = new Point(682, 24);
-            customQueuePanel.MaxNumberOfPanel = 30;
             customQueuePanel.Name = "customQueuePanel";
             customQueuePanel.Size = new Size(200, 425);
             customQueuePanel.TabIndex = 13;
@@ -521,6 +577,7 @@ namespace MediaPlayerWinforms
             customMediaPlayer.VlcMediaplayerOptions = null;
             customMediaPlayer.EndReached += customMediaPlayer_EndReached;
             customMediaPlayer.Click += customMediaPlayer_Click;
+            customMediaPlayer.DoubleClick += customMediaPlayer_DoubleClick;
             // 
             // MainForm
             // 
@@ -600,6 +657,13 @@ namespace MediaPlayerWinforms
         private PictureBox loopPictureBox;
         private PictureBox fullScrenPictureBox;
         private ToolStripMenuItem outilsToolStripMenuItem;
-        private ToolStripMenuItem créerSoustitresToolStripMenuItem;
+        private ToolStripMenuItem soustitresToolStripMenuItem;
+        private ToolStripMenuItem créerSoustitresToolStripMenuItem1;
+        private ToolStripMenuItem tailleDuModelToolStripMenuItem;
+        private ToolStripMenuItem tinyToolStripMenuItem;
+        private ToolStripMenuItem baseToolStripMenuItem;
+        private ToolStripMenuItem smallToolStripMenuItem;
+        private ToolStripMenuItem mediumToolStripMenuItem;
+        private ToolStripMenuItem largeToolStripMenuItem;
     }
 }

@@ -1,8 +1,4 @@
-﻿using System.ComponentModel;
-
-
-
-namespace MediaPlayerWinforms.CustomControls
+﻿namespace MediaPlayerWinforms.CustomControls
 {
     class CustomQueuePanel : Panel
     {
@@ -16,7 +12,7 @@ namespace MediaPlayerWinforms.CustomControls
             {
                 waitlist[i].Dock = DockStyle.Top;
                 waitlist[i].Margin = new Padding(0, 40, 0, 0); // Adjust padding as needed
-                Controls.Add(waitlist[i]); 
+                Controls.Add(waitlist[i]);
             }
         }
     }

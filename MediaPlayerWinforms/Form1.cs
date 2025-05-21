@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using MediaPlayerWinforms.CustomControls;
+using System.ComponentModel;
 
 namespace MediaPlayerWinforms
 {
@@ -30,17 +31,21 @@ namespace MediaPlayerWinforms
 
         private ToolStripMenuItem curModelSize;
 
+        private List<PictureBox> pictureBoxesLoop = new List<PictureBox>();
+
         public MainForm()
         {
             InitializeComponent();
+
+            pictureBoxesLoop.Add(new PictureBox());
 
             customMediaPlayer.Video.IsMouseInputEnabled = false;
             customMediaPlayer.Video.IsKeyInputEnabled = false;
 
             curModelSize = baseToolStripMenuItem;
 
-        // Link event
-        mediaCustomProgressBar.OnClickProgressBarForMediaPlayer += customMediaPlayer.OnClickProgressBarForMediaPlayer;
+            // Link event
+            mediaCustomProgressBar.OnClickProgressBarForMediaPlayer += customMediaPlayer.OnClickProgressBarForMediaPlayer;
             mediaPlayerSlider.OnMouseDownForMediaPlayer += customMediaPlayer.OnMouseDownForMediaPlayer;
             customMediaPlayer.LocalDatabaseAddToHistoric += localDatabase.AddToHistoric;
             customMediaPlayer.InitProgressBar += mediaCustomProgressBar.InitProgressBar;
@@ -175,8 +180,7 @@ namespace MediaPlayerWinforms
             else
             {
                 // init media player + progress bar
-                //customMediaPlayer.LoadMediaAndPlay("https://www.learningcontainer.com/wp-content/uploads/2020/05/sample-mp4-file.mp4");
-                customMediaPlayer.LoadMediaAndPlay("C:\\Users\\tigro\\source\\repos\\MediaPlayerWinforms\\MediaPlayerWinforms\\tmp\\video_test.mp4");
+                customMediaPlayer.LoadMediaAndPlay(Path.Combine(Directory.GetCurrentDirectory(), "tmp\\video_test.mp4"), false);
             }
         }
 
@@ -218,7 +222,7 @@ namespace MediaPlayerWinforms
         {
             string? filePath = AskVideoPath();
             if (filePath != null)
-                customMediaPlayer.LoadMediaAndPlay(filePath);
+                customMediaPlayer.LoadMediaAndPlay(filePath, false);
             else
                 Console.WriteLine("No media to load");
         }
@@ -234,7 +238,7 @@ namespace MediaPlayerWinforms
                 if (openFileDialog.ShowDialog() == DialogResult.OK)
                 {
                     string[] filePaths = openFileDialog.FileNames;
-                    customMediaPlayer.LoadMediaAndPlay(filePaths[0]);
+                    customMediaPlayer.LoadMediaAndPlay(filePaths[0], false);
                     for (int i = 1; i < filePaths.Length; i++)
                     {
                         customMediaPlayer.AddToWaitList(filePaths[i]);
@@ -258,7 +262,7 @@ namespace MediaPlayerWinforms
                               .Where(file => extensions.Any(ext => file.EndsWith(ext, StringComparison.OrdinalIgnoreCase)))
                               .ToList();
 
-                        customMediaPlayer.LoadMediaAndPlay(filePaths[0]);
+                        customMediaPlayer.LoadMediaAndPlay(filePaths[0], false);
                         for (int i = 1; i < filePaths.Count; i++)
                         {
                             customMediaPlayer.AddToWaitList(filePaths[i]);
@@ -328,7 +332,7 @@ namespace MediaPlayerWinforms
                     var clickedItem = (ToolStripMenuItem)s;
                     (string name, string path, DateTime lastModified) historicEntry = (ValueTuple<string, string, DateTime>)clickedItem.Tag;
 
-                    customMediaPlayer.LoadMediaAndPlay(historicEntry.path);
+                    customMediaPlayer.LoadMediaAndPlay(historicEntry.path, false);
                 };
 
                 historiqueToolStripMenuItem.DropDownItems.Add(menuItem);
@@ -347,7 +351,7 @@ namespace MediaPlayerWinforms
 
         private void customMediaPlayer_EndReached(object sender, Vlc.DotNet.Core.VlcMediaPlayerEndReachedEventArgs e)
         {
-            Console.WriteLine("END REACH");
+            Utility.WriteLineColor("EOF", ConsoleColor.Magenta);
 
             customMediaPlayer.Next(false);
         }
@@ -442,6 +446,7 @@ namespace MediaPlayerWinforms
         private void favPictureBox_Click(object sender, EventArgs e)
         {
             favPictureBox.BackgroundImage = Properties.Resources.fav_50;
+            localDatabase.ModifyFav(customMediaPlayer.CurrentVideoPath);
         }
 
         // Override ProcessCmdKey to capture arrow key presses

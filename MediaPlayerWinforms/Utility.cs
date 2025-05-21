@@ -1,10 +1,11 @@
 ﻿using System.Diagnostics;
 using System.IO.Compression;
+using System.Runtime.CompilerServices;
 using System.Text;
 
 namespace MediaPlayerWinforms
 {
-    internal class Utility
+    public static class Utility
     {
         public static byte[] Compress(string text)
         {
@@ -77,6 +78,22 @@ namespace MediaPlayerWinforms
                     Console.WriteLine(ex.Message);
                 }
             }
+        }
+        
+        public static T NextEnum<T>(this T src) where T : struct
+        {
+            if (!typeof(T).IsEnum) throw new ArgumentException(String.Format("Arggument {0} is not an Enum", typeof(T).FullName));
+
+            T[] Arr = (T[])Enum.GetValues(src.GetType());
+            int j = Array.IndexOf<T>(Arr,src) + 1;
+            return (Arr.Length == j) ? Arr[0] : Arr[j];
+        }
+
+        public static void WriteLineColor<T>(T text, ConsoleColor color)
+        {
+            Console.ForegroundColor = color;
+            Console.WriteLine(text);
+            Console.ResetColor();
         }
     }
 }

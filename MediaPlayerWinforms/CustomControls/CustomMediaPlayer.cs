@@ -5,15 +5,6 @@ using Vlc.DotNet.Core.Interops.Signatures;
 
 namespace MediaPlayerWinforms.CustomControls
 {
-    public enum LoopType
-    {
-        NoLoop,
-        Loop1time,
-        LoopNtimes,
-        LoopAll,
-        InfiniteLoop
-    }
-
     class CustomMediaPlayer : Vlc.DotNet.Forms.VlcControl
     {
         List<CustomPictureBox> _playlist = [];
@@ -25,10 +16,7 @@ namespace MediaPlayerWinforms.CustomControls
         public event Action<bool?> ModifyFullScreen;
         public event Action<List<CustomPictureBox>> AddToWaitlistDisplay;
 
-        LoopType _loopVar; // type of loop
-        int _loopN = 0; // number of loop if LoopNtimes
-        int _loopCount = 0; // number of loop to reach in current context
-        int _loopCounter = 0; // current number of loop
+        
 
         private Label labelTotalMediaTime;
 
@@ -36,10 +24,7 @@ namespace MediaPlayerWinforms.CustomControls
         public Label LabelTotalMediaTime { get => labelTotalMediaTime; set => labelTotalMediaTime = value; }
 
         [Category("Custom Controls")]
-        public LoopType LoopVar { get => _loopVar; set => _loopVar = value; }
-
-        [Category("Custom Controls")]
-        public int LoopN { get => _loopN; set => _loopN = value; }
+        public LoopManager LoopManager { get; set; }
 
         public CustomMediaPlayer() : base()
         {
@@ -56,7 +41,7 @@ namespace MediaPlayerWinforms.CustomControls
                  VlcMedia media = GetCurrentMedia();
                 if (media != null)
                     return media.Duration.TotalSeconds;
-                Console.WriteLine("Duration not set");
+                Utility.WriteLineColor("Duration not set", ConsoleColor.Red);
                 return 0;
             } 
         }
@@ -89,46 +74,23 @@ namespace MediaPlayerWinforms.CustomControls
 
         public void Next(bool forceFlag)
         {
+            DebugMediaPlayer();
             if (_playlist.Count == 0)
             {
-                Console.WriteLine("Empty playlist");
+                Utility.WriteLineColor("Empty playlist", ConsoleColor.DarkGreen);
             }
-
-            //switch (LoopVar)
-            //{
-            //    case LoopType.NoLoop:
-            //        _loopCount = 0;
-            //        forceFlag = true;
-            //        break;
-            //    case LoopType.LoopAll:
-            //        throw new NotImplementedException();
-            //    case LoopType.Loop1time:
-            //        _loopCount = 1;
-            //        break;
-            //    case LoopType.LoopNtimes:
-            //        _loopCount = LoopN;
-            //        break;
-            //    case LoopType.InfiniteLoop:
-            //        Play(_playlist[currentVideoId]);
-            //        // bug, not playing
-            //        return null;
-            //}
-
-            //_loopCounter++;
-
-            //if (forceFlag || _loopCounter > _loopCount)
-            //{
-            //    string path = _listNextVideos[0];
-            //    _stackPrecedentVideos.Push(path);
-
-            //    _loopCounter = 0;
-            //    return path;
-            //}
-
-            if (currentVideoId + 1 < _playlist.Count)
+            else if (LoopManager.IsLooping())
             {
+                Utility.WriteLineColor("Looping", ConsoleColor.DarkGreen);
+                LoadMediaAndPlay(CurrentVideoPath, true);
+            }
+            else if (currentVideoId + 1 < _playlist.Count)
+            {
+                Utility.WriteLineColor("Next", ConsoleColor.DarkGreen);
                 LoadMediaAndPlay(_playlist[currentVideoId+1]);
             }
+            else
+                Utility.WriteLineColor("No Next", ConsoleColor.DarkGreen);
         }
 
         public void Precedent()
@@ -142,11 +104,12 @@ namespace MediaPlayerWinforms.CustomControls
             }
         }
 
-        public async void LoadMediaAndPlay(string url)
+        public async void LoadMediaAndPlay(string url, bool fromLoop)
         {
-            Console.WriteLine("LOAD MEDIA AND PLAY FROM URL");
+            Utility.WriteLineColor("LOAD MEDIA AND PLAY FROM URL", ConsoleColor.DarkMagenta);
 
-            AddToWaitList(url);
+            if (!fromLoop)
+                AddToWaitList(url);
 
             //_playlist[currentVideoId].Enabled = false; // not empty because of AddToWaitList
             _playlist[currentVideoId].BackColor = Color.Black;
@@ -177,6 +140,7 @@ namespace MediaPlayerWinforms.CustomControls
             InitProgressBar((int)duration);
 
             DebugWaitList();
+            Utility.WriteLineColor("Playing from start", ConsoleColor.DarkMagenta);
         }
 
         public async void LoadMediaAndPlay(CustomPictureBox pictureBox)
@@ -237,6 +201,16 @@ namespace MediaPlayerWinforms.CustomControls
             Console.ForegroundColor = ConsoleColor.White;
         }
 
+        public void DebugMediaPlayer()
+        {
+            Utility.WriteLineColor($"currentVideoId : {currentVideoId}",ConsoleColor.Green);
+            Utility.WriteLineColor($"PositionSeconds : {PositionSeconds}", ConsoleColor.Green);
+            Utility.WriteLineColor($"CurrentVideoPath : {CurrentVideoPath}", ConsoleColor.Green);
+            Utility.WriteLineColor($"IsPaused : {IsPaused}", ConsoleColor.Green);
+            Utility.WriteLineColor($"Volume : {Volume}", ConsoleColor.Green);
+            Utility.WriteLineColor($"Duration : {Duration}", ConsoleColor.Green);
+        }
+
         private async void AssertVideoPath(string url)
         {
             if (url.StartsWith("http://") || url.StartsWith("https://"))
@@ -268,7 +242,7 @@ namespace MediaPlayerWinforms.CustomControls
                         return;
                     }
                 }
-                throw new Exception("Le fichier local n'existe pas ou n'est pas une vidéo");
+                throw new Exception($"{url} n'existe pas ou n'est pas une vidéo");
             }
         }
 

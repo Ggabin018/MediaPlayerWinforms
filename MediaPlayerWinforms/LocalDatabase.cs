@@ -154,5 +154,32 @@ namespace MediaPlayerWinforms
             }
         }
 
+        public void ModifyFav(string Path)
+        {
+            using SQLiteConnection connection = new(connectionString);
+            {
+                connection.Open();
+                // TODO
+
+                //string selectQuery = "UPDATE Name, Path, LastModified FROM History;";
+
+                //using (SQLiteCommand command = new(selectQuery, connection))
+                //using (SQLiteDataReader reader = command.ExecuteReader())
+                //{
+                //    List<(string Name, string Path, DateTime LastModified)> historyEntries = [];
+
+                //    while (reader.Read())
+                //    {
+                //        string name = Utility.Decompress((byte[])reader["Name"]);
+                //        string path = Utility.Decompress((byte[])reader["Path"]);
+
+                //        DateTime lastModified = reader.GetDateTime(2);
+
+                //        historyEntries.Add((name, path, lastModified));
+                //    }
+                //}
+            }
+        }
+
     }
 }
